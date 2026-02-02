@@ -9,13 +9,13 @@
 4. Support study collaboration ; Let students create/join study groups matched by course/topic and availability, with time-boxed group spaces.
 5. Keep the platform safe and trustworthy ; Add ambassador verification, reporting, moderation tools, and audit logs.
 
-Goals 
+## Goals 
 
 1. Students can go from feed → event/study group → chat in under 2 minutes.
 2. Clubs can promote events and convert viewers into members/RSVPs.
 3. Moderation/reporting is clear, fast, and traceable.
 4. The system stays responsive with pagination, indexing, and rate limiting.
 
-
-## frontend --> Ashmit Sharma and Yash Chaudhari
-## Backend --> Nitin Avula and Rohith Reddy Nama
+## Members
+#### frontend --> Ashmit Sharma and Yash Chaudhari
+#### Backend --> Nitin Avula and Rohith Reddy Nama
