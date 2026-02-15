@@ -1,31 +1,42 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
-	"os"
+
+	"backend/internal/config"
+	"backend/internal/db"
+	"backend/internal/handlers"
+	"backend/internal/middleware"
 )
 
 func main() {
+	// Load configuration
+	cfg := config.Load()
+	fmt.Printf("Starting Campus-O-Network API (%s) on port %s...\n", cfg.DBType, cfg.Port)
+
+	// Connect to database
+	database, err := db.New(cfg) // Pass config instead of connection string
+	if err != nil {
+		fmt.Println("Failed to connect to database:", err)
+		return
+	}
+	defer database.Close()
+
+	// Rest of the code stays the same...
+	h := handlers.New(database)
 	mux := http.NewServeMux()
+	mux.HandleFunc("/health", middleware.CORS(h.Health))
+	mux.HandleFunc("/auth/register", middleware.CORS(h.Register))
+	mux.HandleFunc("/auth/login", middleware.CORS(h.Login))
+	mux.HandleFunc("/feed", middleware.CORS(h.GetFeed))
 
-	// health check
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
-	})
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
+	server := &http.Server{
+		Addr:    ":" + cfg.Port,
+		Handler: mux,
 	}
 
-	addr := ":" + port
-	log.Printf("API listening on %s", addr)
-
-	// basic server
-	if err := http.ListenAndServe(addr, mux); err != nil {
-		log.Fatal(err)
+	if err := server.ListenAndServe(); err != nil {
+		fmt.Println("Server error:", err)
 	}
 }
