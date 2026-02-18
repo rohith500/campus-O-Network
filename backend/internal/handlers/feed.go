@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"backend/internal/middleware"
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // CreatePostRequest represents the request to create a post
@@ -24,11 +26,20 @@ func (h *Handler) CreatePost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
+	req.Content = strings.TrimSpace(req.Content)
+	req.Tags = strings.TrimSpace(req.Tags)
+	if req.Content == "" {
+		http.Error(w, "Content is required", http.StatusBadRequest)
+		return
+	}
 
-	// Get user ID from context (set by auth middleware)
-	userID := 1 // TODO: Get from context
+	claims, ok := middleware.GetClaims(r)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
-	post, err := h.db.CreatePost(userID, req.Content, req.Tags)
+	post, err := h.db.CreatePost(claims.UserID, req.Content, req.Tags)
 	if err != nil {
 		http.Error(w, "Failed to create post", http.StatusInternalServerError)
 		return
@@ -57,6 +68,12 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		if o, err := strconv.Atoi(v); err == nil {
 			offset = o
 		}
+	}
+	if limit <= 0 || limit > 100 {
+		limit = 10
+	}
+	if offset < 0 {
+		offset = 0
 	}
 
 	posts, err := h.db.GetAllPosts(limit, offset)

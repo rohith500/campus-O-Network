@@ -21,7 +21,7 @@ func Load() *Config {
 	dbType := getEnv("DB_TYPE", "sqlite") // default to SQLite
 
 	return &Config{
-		Port:   getEnv("PORT", "8080"),
+		Port:   getEnv("PORT", "8079"), // default port
 		DBType: dbType,
 		DBPath: getEnv("DB_PATH", "./data/campus_o_network.db"), // SQLite file path
 		DBHost: getEnv("DB_HOST", "localhost"),

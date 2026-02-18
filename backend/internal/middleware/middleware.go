@@ -1,5 +1,4 @@
 package middleware
-
 import "net/http"
 
 // Logger logs HTTP requests

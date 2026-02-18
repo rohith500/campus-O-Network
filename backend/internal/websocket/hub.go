@@ -1,5 +1,7 @@
 package websocket
 
+import "github.com/gorilla/websocket"
+
 // Hub manages active WebSocket connections for chat
 type Hub struct {
 	clients    map[*Client]bool
@@ -28,23 +30,22 @@ func NewHub() *Hub {
 func (h *Hub) Run() {
 	for {
 		select {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}	}		}			}				}					delete(h.clients, client)					close(client.send)				default:				case client.send <- message:				select {			for client := range h.clients {		case message := <-h.broadcast:			}				close(client.send)				delete(h.clients, client)			if _, ok := h.clients[client]; ok {		case client := <-h.unregister:			h.clients[client] = true		case client := <-h.register:
+		case client := <-h.register:
+			h.clients[client] = true
+		case client := <-h.unregister:
+			if _, ok := h.clients[client]; ok {
+				delete(h.clients, client)
+				close(client.send)
+			}
+		case message := <-h.broadcast:
+			for client := range h.clients {
+				select {
+				case client.send <- message:
+				default:
+					close(client.send)
+					delete(h.clients, client)
+				}
+			}
+		}
+	}
+}
