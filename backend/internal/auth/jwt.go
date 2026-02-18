@@ -8,7 +8,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// JWTClaims represents JWT token claims
 type JWTClaims struct {
 	UserID int    `json:"user_id"`
 	Email  string `json:"email"`
@@ -56,14 +55,17 @@ func ValidateToken(token string) (*JWTClaims, error) {
 	if !ok {
 		return nil, errors.New("invalid user id claim")
 	}
+
 	email, ok := mapClaims["email"].(string)
 	if !ok {
 		return nil, errors.New("invalid email claim")
 	}
+
 	role, ok := mapClaims["role"].(string)
 	if !ok {
 		return nil, errors.New("invalid role claim")
 	}
+
 	expFloat, ok := mapClaims["exp"].(float64)
 	if !ok {
 		return nil, errors.New("invalid exp claim")
