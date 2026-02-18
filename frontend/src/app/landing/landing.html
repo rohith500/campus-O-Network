@@ -1,0 +1,85 @@
+<!-- Navbar -->
+<mat-toolbar class="navbar">
+  <div class="navbar-brand">
+    <mat-icon class="brand-icon">hub</mat-icon>
+    <span class="brand-name">CampusNet</span>
+  </div>
+  <span class="spacer"></span>
+  <div class="nav-actions">
+    <a mat-button routerLink="/auth/login" class="signin-btn">Sign In</a>
+    <a mat-flat-button routerLink="/auth/register" class="signup-btn">Register</a>
+  </div>
+</mat-toolbar>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-glow hero-glow-1"></div>
+  <div class="hero-glow hero-glow-2"></div>
+  <div class="hero-content">
+    <mat-chip-set class="hero-badge">
+      <mat-chip class="badge-chip">Coming Soon</mat-chip>
+    </mat-chip-set>
+    <h1 class="hero-title">
+      Your Campus,<br />
+      <span class="gradient-text">Connected.</span>
+    </h1>
+    <p class="hero-subtitle">
+      CampusNet brings your entire university life into one place. Explore study groups and campus events
+       with real-time chat and resource sharing.
+    </p>
+    <div class="hero-cta">
+      <a mat-flat-button routerLink="/auth/register" class="cta-primary">
+        Join your Campus
+        <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+      </a>
+      <a mat-stroked-button routerLink="/auth/login" class="cta-secondary">Sign In</a>
+    </div>
+    <p class="hero-meta">Free for all students.</p>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features">
+  <div class="section-header">
+    <h2 class="section-title">Features</h2>
+    <p class="section-subtitle">
+      Powerful tools designed around the way students actually live, study, and connect.
+    </p>
+  </div>
+  <div class="features-grid">
+    @for (feature of features; track feature.title) {
+      <mat-card class="feature-card" appearance="outlined">
+        <mat-card-content>
+          <div class="feature-icon-wrap" [style.background]="feature.color + '18'">
+            <mat-icon [style.color]="feature.color">{{ feature.icon }}</mat-icon>
+          </div>
+          <h3 class="feature-title">{{ feature.title }}</h3>
+          <p class="feature-desc">{{ feature.description }}</p>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</section>
+
+<!-- CTA Banner -->
+<section class="cta-banner">
+  <div class="cta-banner-inner">
+    <h2 class="cta-title">Ready to join?</h2>
+    <p class="cta-subtitle">Sign up in seconds and start connecting with students around you.</p>
+    <div class="cta-actions">
+      <a mat-flat-button routerLink="/auth/register" class="cta-primary">Create Free Account</a>
+      <a mat-button routerLink="/auth/login" class="cta-link">Already have an account? Sign in</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <mat-icon class="brand-icon">hub</mat-icon>
+      <span class="brand-name">CampusNet</span>
+    </div>
+    <p class="footer-copy">Work in Progress.</p>
+  </div>
+</footer>
