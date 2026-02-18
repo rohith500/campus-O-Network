@@ -108,4 +108,3 @@ func (d *DB) DeleteStudent(id int) error {
 	_, err := d.conn.Exec(`DELETE FROM students WHERE id=?`, id)
 	return err
 }
-
