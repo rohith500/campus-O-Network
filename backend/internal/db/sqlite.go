@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -17,9 +18,19 @@ type DB struct {
 // New creates a new DB connection
 // FIXED: now accepts *config.Config (pointer)
 func New(cfg *config.Config) (*DB, error) {
-	dbPath := os.Getenv("DB_PATH")
+	dbPath := cfg.DBPath
+	if dbPath == "" {
+		dbPath = os.Getenv("DB_PATH")
+	}
 	if dbPath == "" {
 		dbPath = "app.db"
+	}
+
+	dbDir := filepath.Dir(dbPath)
+	if dbDir != "." {
+		if err := os.MkdirAll(dbDir, 0o755); err != nil {
+			return nil, err
+		}
 	}
 
 	conn, err := sql.Open("sqlite3", dbPath)
@@ -31,9 +42,62 @@ func New(cfg *config.Config) (*DB, error) {
 		return nil, err
 	}
 
+	if err := bootstrapSchema(conn); err != nil {
+		return nil, err
+	}
+
 	fmt.Println("Connected to SQLite:", dbPath)
 
 	return &DB{conn: conn}, nil
+}
+
+func bootstrapSchema(conn *sql.DB) error {
+	statements := []string{
+		`CREATE TABLE IF NOT EXISTS users (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			email TEXT UNIQUE NOT NULL,
+			password TEXT NOT NULL,
+			name TEXT NOT NULL,
+			role TEXT DEFAULT 'student',
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE TABLE IF NOT EXISTS feed_posts (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			content TEXT NOT NULL,
+			tags TEXT,
+			likes INT DEFAULT 0,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE TABLE IF NOT EXISTS students (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			email TEXT NOT NULL UNIQUE,
+			major TEXT,
+			year INTEGER CHECK (year >= 1 AND year <= 8),
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
+		`CREATE INDEX IF NOT EXISTS idx_feed_posts_user_id ON feed_posts(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_feed_posts_created_at ON feed_posts(created_at DESC)`,
+		`CREATE TRIGGER IF NOT EXISTS trg_students_updated_at
+		AFTER UPDATE ON students
+		FOR EACH ROW
+		BEGIN
+			UPDATE students SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
+		END`,
+	}
+
+	for _, stmt := range statements {
+		if _, err := conn.Exec(stmt); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (d *DB) Close() error {

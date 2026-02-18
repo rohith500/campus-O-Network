@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	// Load configuration
+
 	cfg := config.Load()
 	fmt.Printf("Starting Campus-O-Network(%s) on port %s...\n", cfg.DBType, cfg.Port)
 
@@ -26,6 +26,9 @@ func main() {
 	mux.HandleFunc("/health", middleware.CORS(h.Health))
 	mux.HandleFunc("/auth/register", middleware.CORS(h.Register))
 	mux.HandleFunc("/auth/login", middleware.CORS(h.Login))
+	mux.HandleFunc("/feed/create", middleware.CORS(middleware.Auth(h.CreatePost)))
+	mux.HandleFunc("/students", middleware.CORS(middleware.Auth(h.Students)))
+	mux.HandleFunc("/students/", middleware.CORS(middleware.Auth(h.StudentsByID)))
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,

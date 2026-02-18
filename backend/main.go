@@ -31,6 +31,7 @@ func main() {
 	mux.HandleFunc("/auth/register", middleware.CORS(h.Register))
 	mux.HandleFunc("/auth/login", middleware.CORS(h.Login))
 	mux.HandleFunc("/feed", middleware.CORS(h.GetFeed))
+	mux.HandleFunc("/feed/create", middleware.CORS(middleware.Auth(h.CreatePost)))
 
 	// Protected routes (JWT)
 	mux.HandleFunc("/students", middleware.CORS(middleware.Auth(h.Students)))
