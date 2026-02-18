@@ -1,103 +1,46 @@
-package handlers
+package middleware
 
 import (
-	"encoding/json"
-	"net/http"
-
 	"backend/internal/auth"
+	"context"
+	"net/http"
+	"strings"
 )
 
-type registerReq struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+type contextKey string
+
+const userClaimsKey contextKey = "user_claims"
+
+func Auth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		header := r.Header.Get("Authorization")
+		if header == "" {
+			http.Error(w, "missing authorization header", http.StatusUnauthorized)
+			return
+		}
+
+		parts := strings.SplitN(header, " ", 2)
+		if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") || strings.TrimSpace(parts[1]) == "" {
+			http.Error(w, "invalid authorization header", http.StatusUnauthorized)
+			return
+		}
+
+		claims, err := auth.ValidateToken(strings.TrimSpace(parts[1]))
+		if err != nil {
+			http.Error(w, "invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), userClaimsKey, claims)
+		next(w, r.WithContext(ctx))
+	}
 }
 
-type loginReq struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return Auth(next)
 }
 
-func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var req registerReq
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid json", http.StatusBadRequest)
-		return
-	}
-	if req.Name == "" || req.Email == "" || req.Password == "" {
-		http.Error(w, "missing fields", http.StatusBadRequest)
-		return
-	}
-
-	hash, err := auth.HashPassword(req.Password)
-	if err != nil {
-		http.Error(w, "failed to hash password", http.StatusInternalServerError)
-		return
-	}
-
-	// NOTE: This requires user_repo.go to have CreateUser(name,email,password,role)
-	user, err := h.db.CreateUser(req.Name, req.Email, hash, "student")
-	if err != nil {
-		http.Error(w, "Failed to register user", http.StatusBadRequest)
-		return
-	}
-
-	token, err := auth.GenerateToken(user.ID, user.Email, user.Role)
-	if err != nil {
-		http.Error(w, "failed to generate token", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(map[string]any{
-		"token": token,
-		"user":  user,
-	})
-}
-
-func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var req loginReq
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid json", http.StatusBadRequest)
-		return
-	}
-	if req.Email == "" || req.Password == "" {
-		http.Error(w, "missing fields", http.StatusBadRequest)
-		return
-	}
-
-	// NOTE: This requires user_repo.go to have GetUserByEmail(email)
-	user, err := h.db.GetUserByEmail(req.Email)
-	if err != nil {
-		http.Error(w, "User not found", http.StatusUnauthorized)
-		return
-	}
-
-	ok, _ := auth.VerifyPassword(req.Password, user.Password)
-	if !ok {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
-		return
-	}
-
-	token, err := auth.GenerateToken(user.ID, user.Email, user.Role)
-	if err != nil {
-		http.Error(w, "failed to generate token", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(map[string]any{
-		"token": token,
-		"user":  user,
-	})
+func GetClaims(r *http.Request) (*auth.JWTClaims, bool) {
+	claims, ok := r.Context().Value(userClaimsKey).(*auth.JWTClaims)
+	return claims, ok
 }
