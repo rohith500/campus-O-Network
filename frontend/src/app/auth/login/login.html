@@ -1,0 +1,104 @@
+<!-- Navbar -->
+<mat-toolbar class="navbar">
+  <a routerLink="/" class="navbar-brand">
+    <mat-icon class="brand-icon">hub</mat-icon>
+    <span class="brand-name">CampusNet</span>
+  </a>
+  <span class="spacer"></span>
+  <a mat-button routerLink="/auth/register" class="nav-link">Create account</a>
+</mat-toolbar>
+
+<!-- Page -->
+<div class="auth-page">
+  <!-- Background glows -->
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <div class="auth-container">
+    <!-- Card -->
+    <div class="auth-card">
+      <!-- Header -->
+      <div class="card-header">
+        <div class="card-icon-wrap">
+          <mat-icon class="card-icon">lock_open</mat-icon>
+        </div>
+        <h1 class="card-title">Welcome back</h1>
+        <p class="card-subtitle">Sign in to your CampusNet account</p>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form" novalidate>
+        <!-- Email -->
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>University email</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email" />
+          <mat-icon matPrefix class="field-prefix-icon">alternate_email</mat-icon>
+          @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+            <mat-error>Email is required</mat-error>
+          } @else if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+            <mat-error>Enter a valid email address</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Password -->
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [type]="hidePassword ? 'password' : 'text'"
+            formControlName="password"
+            autocomplete="current-password"
+          />
+          <mat-icon matPrefix class="field-prefix-icon">key</mat-icon>
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword = !hidePassword"
+            class="toggle-visibility"
+          >
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.get('password')?.hasError('required') && form.get('password')?.touched) {
+            <mat-error>Password is required</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Remember / Forgot -->
+        <div class="form-meta">
+          <mat-checkbox formControlName="remember" class="remember-checkbox"
+            >Remember me</mat-checkbox
+          >
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <!-- Submit -->
+        <button
+          mat-flat-button
+          type="submit"
+          class="submit-btn"
+          [disabled]="form.invalid || loading"
+        >
+          @if (loading) {
+            <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+          }
+          <span class="btn-label">{{ loading ? 'Signing in…' : 'Sign In' }}</span>
+          @if (!loading) {
+            <mat-icon>arrow_forward</mat-icon>
+          }
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span class="divider-line"></span>
+        <span class="divider-text">New to CampusNet?</span>
+        <span class="divider-line"></span>
+      </div>
+
+      <a mat-stroked-button routerLink="/auth/register" class="alt-btn">
+        Create a free account
+      </a>
+    </div>
+  </div>
+</div>
