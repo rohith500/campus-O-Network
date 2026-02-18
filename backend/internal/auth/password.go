@@ -1,13 +1,22 @@
 package auth
 
-// HashPassword hashes a password (TODO: use bcrypt)
+import "golang.org/x/crypto/bcrypt"
+
 func HashPassword(password string) (string, error) {
-	// TODO: Implement proper bcrypt hashing
-	return password, nil
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hash), nil
 }
 
-// VerifyPassword verifies a password against a hash
 func VerifyPassword(password, hash string) (bool, error) {
-	// TODO: Implement proper bcrypt verification
-	return password == hash, nil
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	if err == nil {
+		return true, nil
+	}
+	if err == bcrypt.ErrMismatchedHashAndPassword {
+		return false, nil
+	}
+	return false, err
 }
