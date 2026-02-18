@@ -10,18 +10,22 @@ import (
 
 // CreatePost creates a new feed post (WRITE)
 func (db *DB) CreatePost(userID int, content, tags string) (*models.Post, error) {
-	post := &models.Post{}
-	err := db.conn.QueryRow(
+	now := time.Now()
+	result, err := db.conn.Exec(
 		`INSERT INTO feed_posts (user_id, content, tags, likes, created_at, updated_at)
-		 VALUES ($1, $2, $3, 0, $4, $5)
-		 RETURNING id, user_id, content, tags, likes, created_at, updated_at`,
-		userID, content, tags, time.Now(), time.Now(),
-	).Scan(&post.ID, &post.UserID, &post.Content, &post.Tags, &post.Likes, &post.CreatedAt, &post.UpdatedAt)
-
+		 VALUES (?, ?, ?, 0, ?, ?)`,
+		userID, content, tags, now, now,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create post: %w", err)
 	}
-	return post, nil
+
+	newID, err := result.LastInsertId()
+	if err != nil {
+		return nil, fmt.Errorf("failed to read new post id: %w", err)
+	}
+
+	return db.GetPostByID(int(newID))
 }
 
 // GetPostByID retrieves a post by ID (READ)
@@ -29,7 +33,7 @@ func (db *DB) GetPostByID(id int) (*models.Post, error) {
 	post := &models.Post{}
 	err := db.conn.QueryRow(
 		`SELECT id, user_id, content, tags, likes, created_at, updated_at
-		 FROM feed_posts WHERE id = $1`,
+		 FROM feed_posts WHERE id = ?`,
 		id,
 	).Scan(&post.ID, &post.UserID, &post.Content, &post.Tags, &post.Likes, &post.CreatedAt, &post.UpdatedAt)
 
@@ -48,7 +52,7 @@ func (db *DB) GetAllPosts(limit, offset int) ([]*models.Post, error) {
 		`SELECT id, user_id, content, tags, likes, created_at, updated_at
 		 FROM feed_posts
 		 ORDER BY created_at DESC
-		 LIMIT $1 OFFSET $2`,
+		 LIMIT ? OFFSET ?`,
 		limit, offset,
 	)
 
@@ -76,8 +80,8 @@ func (db *DB) GetAllPosts(limit, offset int) ([]*models.Post, error) {
 // UpdatePost updates a post (MODIFY)
 func (db *DB) UpdatePost(id int, content, tags string) error {
 	result, err := db.conn.Exec(
-		`UPDATE feed_posts SET content = $1, tags = $2, updated_at = $3
-		 WHERE id = $4`,
+		`UPDATE feed_posts SET content = ?, tags = ?, updated_at = ?
+		 WHERE id = ?`,
 		content, tags, time.Now(), id,
 	)
 
@@ -99,7 +103,7 @@ func (db *DB) UpdatePost(id int, content, tags string) error {
 
 // DeletePost deletes a post (MODIFY)
 func (db *DB) DeletePost(id int) error {
-	result, err := db.conn.Exec(`DELETE FROM feed_posts WHERE id = $1`, id)
+	result, err := db.conn.Exec(`DELETE FROM feed_posts WHERE id = ?`, id)
 
 	if err != nil {
 		return fmt.Errorf("failed to delete post: %w", err)
@@ -120,8 +124,8 @@ func (db *DB) DeletePost(id int) error {
 // LikePost increments the like count (MODIFY)
 func (db *DB) LikePost(id int) error {
 	result, err := db.conn.Exec(
-		`UPDATE feed_posts SET likes = likes + 1, updated_at = $1
-		 WHERE id = $2`,
+		`UPDATE feed_posts SET likes = likes + 1, updated_at = ?
+		 WHERE id = ?`,
 		time.Now(), id,
 	)
 

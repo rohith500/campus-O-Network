@@ -10,18 +10,22 @@ import (
 
 // CreateUser creates a new user in the database (WRITE)
 func (db *DB) CreateUser(email, passwordHash, name, role string) (*models.User, error) {
-	user := &models.User{}
-	err := db.conn.QueryRow(
+	now := time.Now()
+	result, err := db.conn.Exec(
 		`INSERT INTO users (email, password, name, role, created_at, updated_at)
-		 VALUES ($1, $2, $3, $4, $5, $6)
-		 RETURNING id, email, password, name, role, created_at, updated_at`,
-		email, passwordHash, name, role, time.Now(), time.Now(),
-	).Scan(&user.ID, &user.Email, &user.Password, &user.Name, &user.Role, &user.CreatedAt, &user.UpdatedAt)
-
+		 VALUES (?, ?, ?, ?, ?, ?)`,
+		email, passwordHash, name, role, now, now,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
-	return user, nil
+
+	newID, err := result.LastInsertId()
+	if err != nil {
+		return nil, fmt.Errorf("failed to read new user id: %w", err)
+	}
+
+	return db.GetUserByID(int(newID))
 }
 
 // GetUserByID retrieves a user by ID (READ)
@@ -29,7 +33,7 @@ func (db *DB) GetUserByID(id int) (*models.User, error) {
 	user := &models.User{}
 	err := db.conn.QueryRow(
 		`SELECT id, email, password, name, role, created_at, updated_at
-		 FROM users WHERE id = $1`,
+		 FROM users WHERE id = ?`,
 		id,
 	).Scan(&user.ID, &user.Email, &user.Password, &user.Name, &user.Role, &user.CreatedAt, &user.UpdatedAt)
 
@@ -47,7 +51,7 @@ func (db *DB) GetUserByEmail(email string) (*models.User, error) {
 	user := &models.User{}
 	err := db.conn.QueryRow(
 		`SELECT id, email, password, name, role, created_at, updated_at
-		 FROM users WHERE email = $1`,
+		 FROM users WHERE email = ?`,
 		email,
 	).Scan(&user.ID, &user.Email, &user.Password, &user.Name, &user.Role, &user.CreatedAt, &user.UpdatedAt)
 
@@ -63,8 +67,8 @@ func (db *DB) GetUserByEmail(email string) (*models.User, error) {
 // UpdateUser updates user information (MODIFY)
 func (db *DB) UpdateUser(id int, name, role string) error {
 	result, err := db.conn.Exec(
-		`UPDATE users SET name = $1, role = $2, updated_at = $3
-		 WHERE id = $4`,
+		`UPDATE users SET name = ?, role = ?, updated_at = ?
+		 WHERE id = ?`,
 		name, role, time.Now(), id,
 	)
 
@@ -86,7 +90,7 @@ func (db *DB) UpdateUser(id int, name, role string) error {
 
 // DeleteUser deletes a user (MODIFY)
 func (db *DB) DeleteUser(id int) error {
-	result, err := db.conn.Exec(`DELETE FROM users WHERE id = $1`, id)
+	result, err := db.conn.Exec(`DELETE FROM users WHERE id = ?`, id)
 
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)

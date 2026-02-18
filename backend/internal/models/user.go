@@ -4,23 +4,23 @@ import "time"
 
 // User represents a campus user
 type User struct {
-	ID        int       `db:"id"`
-	Email     string    `db:"email"`
-	Password  string    `db:"password"`
-	Name      string    `db:"name"`
-	Role      string    `db:"role"` // student, ambassador, admin
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	ID        int       `json:"id" db:"id"`
+	Email     string    `json:"email" db:"email"`
+	Password  string    `json:"-" db:"password"` // NEVER expose password
+	Name      string    `json:"name" db:"name"`
+	Role      string    `json:"role" db:"role"` // student, ambassador, admin
+	CreatedAt time.Time `json:"createdAt" db:"created_at"`
+	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"`
 }
 
 // UserProfile represents extended user information
 type UserProfile struct {
-	ID           int       `db:"id"`
-	UserID       int       `db:"user_id"`
-	Bio          string    `db:"bio"`
-	Interests    string    `db:"interests"` // JSON or comma-separated
-	Availability string    `db:"availability"`
-	SkillLevel   string    `db:"skill_level"`
-	CreatedAt    time.Time `db:"created_at"`
-	UpdatedAt    time.Time `db:"updated_at"`
+	ID           int       `json:"id" db:"id"`
+	UserID       int       `json:"userId" db:"user_id"`
+	Bio          string    `json:"bio" db:"bio"`
+	Interests    string    `json:"interests" db:"interests"`
+	Availability string    `json:"availability" db:"availability"`
+	SkillLevel   string    `json:"skillLevel" db:"skill_level"`
+	CreatedAt    time.Time `json:"createdAt" db:"created_at"`
+	UpdatedAt    time.Time `json:"updatedAt" db:"updated_at"`
 }
