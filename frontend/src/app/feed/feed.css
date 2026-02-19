@@ -1,0 +1,369 @@
+/* ─── Design Tokens ─────────────────────────────────────────────── */
+:host {
+  --primary: #6c63ff;
+  --primary-light: #8b85ff;
+  --accent: #ff6584;
+  --bg: #0a0a12;
+  --bg-surface: #12121f;
+  --bg-card: #16162a;
+  --border: rgba(255, 255, 255, 0.07);
+  --text-primary: #f0f0ff;
+  --text-secondary: #9090b8;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: block;
+  background: var(--bg);
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-primary);
+}
+
+/* ─── Navbar ─────────────────────────────────────────────────────── */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 10, 18, 0.85) !important;
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 64px;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-icon {
+  color: var(--primary) !important;
+  font-size: 28px !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
+}
+
+.spacer { flex: 1; }
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-icon-btn {
+  color: var(--text-secondary) !important;
+}
+
+.logout-btn {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: var(--text-secondary) !important;
+  border-radius: 8px !important;
+  font-size: 0.85rem !important;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.logout-btn:hover {
+  border-color: rgba(255, 101, 132, 0.4) !important;
+  color: var(--accent) !important;
+}
+
+/* ─── Page ───────────────────────────────────────────────────────── */
+.feed-page {
+  position: relative;
+  min-height: calc(100vh - 64px);
+  padding: 32px 24px;
+  overflow: hidden;
+}
+
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+}
+
+.glow-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(108, 99, 255, 0.12) 0%, transparent 70%);
+  top: -80px;
+  left: -100px;
+}
+
+.glow-2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255, 101, 132, 0.09) 0%, transparent 70%);
+  bottom: 0;
+  right: 0;
+}
+
+/* ─── Layout ─────────────────────────────────────────────────────── */
+.feed-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 28px;
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Sidebar ────────────────────────────────────────────────────── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sidebar-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.sidebar-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 auto 12px;
+}
+
+.sidebar-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.sidebar-meta {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.sidebar-nav {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  text-decoration: none;
+}
+
+.nav-item mat-icon {
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.nav-item:hover {
+  background: rgba(108, 99, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: rgba(108, 99, 255, 0.14);
+  color: var(--primary-light);
+}
+
+/* ─── Main Feed ──────────────────────────────────────────────────── */
+.feed-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.feed-header {
+  margin-bottom: 4px;
+}
+
+.feed-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  margin: 0 0 4px;
+}
+
+.feed-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ─── State (loading / empty / error) ───────────────────────────── */
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 16px;
+}
+
+.feed-spinner ::ng-deep circle {
+  stroke: var(--primary) !important;
+}
+
+.state-icon {
+  font-size: 48px !important;
+  width: 48px !important;
+  height: 48px !important;
+  color: var(--text-secondary) !important;
+}
+
+.error-icon {
+  color: var(--accent) !important;
+}
+
+.state-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ─── Posts ──────────────────────────────────────────────────────── */
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.post-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 24px 12px;
+  transition: border-color 0.2s;
+}
+
+.post-card:hover {
+  border-color: rgba(108, 99, 255, 0.2);
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.post-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.post-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.post-author {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.post-time {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.post-menu-btn {
+  color: var(--text-secondary) !important;
+  margin-left: auto;
+}
+
+.post-body {
+  font-size: 0.92rem;
+  color: var(--text-primary);
+  line-height: 1.65;
+  margin: 0 0 8px;
+}
+
+.post-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.action-btn {
+  color: var(--text-secondary) !important;
+  font-size: 0.82rem !important;
+  border-radius: 8px !important;
+  gap: 4px;
+}
+
+.action-btn mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.action-btn:hover {
+  color: var(--primary-light) !important;
+  background: rgba(108, 99, 255, 0.08) !important;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .feed-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .navbar {
+    padding: 0 16px;
+  }
+
+  .feed-page {
+    padding: 24px 16px;
+  }
+}
