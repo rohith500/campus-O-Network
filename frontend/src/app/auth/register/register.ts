@@ -7,7 +7,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,6 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AuthService } from '../../core/auth.service';
 
 function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   const pw = group.get('password')?.value;
@@ -43,6 +44,7 @@ export class Register {
   hidePassword = true;
   hideConfirm = true;
   loading = false;
+  errorMessage = '';
 
   departments = [
     'Computer Science',
@@ -57,7 +59,11 @@ export class Register {
     'Other',
   ];
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private auth: AuthService,
+    private router: Router,
+  ) {
     this.form = this.fb.group(
       {
         fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -76,7 +82,19 @@ export class Register {
       return;
     }
     this.loading = true;
-    // TODO: wire up auth service
-    setTimeout(() => (this.loading = false), 1500);
+    this.errorMessage = '';
+    const { fullName, email, department, password } = this.form.value;
+    this.auth.register({ fullName, email, department, password }).subscribe({
+      next: (res) => {
+        this.loading = false;
+        if (res.success) this.router.navigate(['/feed']);
+        else this.errorMessage = 'Registration failed. Please try again.';
+      },
+      error: () => {
+        this.loading = false;
+        this.errorMessage = 'Something went wrong. Please try again.';
+      },
+    });
   }
 }
+

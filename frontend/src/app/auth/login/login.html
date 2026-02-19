@@ -89,6 +89,13 @@
         </button>
       </form>
 
+      @if (errorMessage) {
+        <div class="error-banner">
+          <mat-icon>error_outline</mat-icon>
+          {{ errorMessage }}
+        </div>
+      }
+
       <!-- Divider -->
       <div class="divider">
         <span class="divider-line"></span>
