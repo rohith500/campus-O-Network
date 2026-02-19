@@ -1,0 +1,131 @@
+<!-- Navbar -->
+<mat-toolbar class="navbar">
+  <div class="navbar-brand">
+    <mat-icon class="brand-icon">hub</mat-icon>
+    <span class="brand-name">CampusNet</span>
+  </div>
+  <span class="spacer"></span>
+  <div class="nav-actions">
+    <button mat-icon-button class="nav-icon-btn" title="Notifications">
+      <mat-icon>notifications</mat-icon>
+    </button>
+    <button mat-icon-button class="nav-icon-btn" title="Messages">
+      <mat-icon>chat_bubble</mat-icon>
+    </button>
+    <button mat-stroked-button class="logout-btn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Sign out
+    </button>
+  </div>
+</mat-toolbar>
+
+<!-- Page -->
+<div class="feed-page">
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <div class="feed-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-avatar">U</div>
+        <p class="sidebar-name">Welcome back!</p>
+        <p class="sidebar-meta">CampusNet member</p>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-item active">
+          <mat-icon>dynamic_feed</mat-icon>
+          <span>Feed</span>
+        </a>
+        <a class="nav-item">
+          <mat-icon>groups</mat-icon>
+          <span>Study Groups</span>
+        </a>
+        <a class="nav-item">
+          <mat-icon>event</mat-icon>
+          <span>Events</span>
+        </a>
+        <a class="nav-item">
+          <mat-icon>folder_open</mat-icon>
+          <span>Resources</span>
+        </a>
+        <a class="nav-item">
+          <mat-icon>person_search</mat-icon>
+          <span>Directory</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Feed -->
+    <main class="feed-main">
+      <div class="feed-header">
+        <h1 class="feed-title">Campus Feed</h1>
+        <p class="feed-subtitle">See what's happening across campus</p>
+      </div>
+
+      <!-- Loading -->
+      @if (loading()) {
+        <div class="state-container">
+          <mat-spinner diameter="44" class="feed-spinner"></mat-spinner>
+          <p class="state-text">Loading posts…</p>
+        </div>
+      }
+
+      <!-- Error -->
+      @if (error() && !loading()) {
+        <div class="state-container">
+          <mat-icon class="state-icon error-icon">error_outline</mat-icon>
+          <p class="state-text">Failed to load feed. Please try again.</p>
+        </div>
+      }
+
+      <!-- Posts -->
+      @if (!loading() && !error()) {
+        <div class="posts-list">
+          @for (post of posts(); track post.id) {
+            <div class="post-card">
+              <div class="post-header">
+                <div
+                  class="post-avatar"
+                  [style.background]="getAvatarColor(post.id)"
+                >
+                  {{ getInitials(post.name) }}
+                </div>
+                <div class="post-meta">
+                  <span class="post-author">{{ post.name }}</span>
+                  <span class="post-time">Just now</span>
+                </div>
+                <button mat-icon-button class="post-menu-btn">
+                  <mat-icon>more_horiz</mat-icon>
+                </button>
+              </div>
+              <p class="post-body">{{ post.description }}</p>
+              <div class="post-actions">
+                <button mat-button class="action-btn">
+                  <mat-icon>thumb_up</mat-icon>
+                  Like
+                </button>
+                <button mat-button class="action-btn">
+                  <mat-icon>chat_bubble_outline</mat-icon>
+                  Comment
+                </button>
+                <button mat-button class="action-btn">
+                  <mat-icon>share</mat-icon>
+                  Share
+                </button>
+              </div>
+            </div>
+          }
+
+          @if (posts().length === 0) {
+            <div class="state-container">
+              <mat-icon class="state-icon">inbox</mat-icon>
+              <p class="state-text">No posts yet. Check back soon!</p>
+            </div>
+          }
+        </div>
+      }
+    </main>
+  </div>
+</div>
