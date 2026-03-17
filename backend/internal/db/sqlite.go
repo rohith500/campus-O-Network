@@ -15,8 +15,6 @@ type DB struct {
 	conn *sql.DB
 }
 
-// New creates a new DB connection
-// FIXED: now accepts *config.Config (pointer)
 func New(cfg *config.Config) (*DB, error) {
 	dbPath := cfg.DBPath
 	if dbPath == "" {
@@ -53,30 +51,31 @@ func New(cfg *config.Config) (*DB, error) {
 
 func bootstrapSchema(conn *sql.DB) error {
 	statements := []string{
+		// ── Sprint 1 ────────────────────────────────────────────
 		`CREATE TABLE IF NOT EXISTS users (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			email TEXT UNIQUE NOT NULL,
-			password TEXT NOT NULL,
-			name TEXT NOT NULL,
-			role TEXT DEFAULT 'student',
+			id         INTEGER PRIMARY KEY AUTOINCREMENT,
+			email      TEXT UNIQUE NOT NULL,
+			password   TEXT NOT NULL,
+			name       TEXT NOT NULL,
+			role       TEXT DEFAULT 'student',
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		)`,
 		`CREATE TABLE IF NOT EXISTS feed_posts (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-			content TEXT NOT NULL,
-			tags TEXT,
-			likes INT DEFAULT 0,
+			id         INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id    INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			content    TEXT NOT NULL,
+			tags       TEXT,
+			likes      INT DEFAULT 0,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		)`,
 		`CREATE TABLE IF NOT EXISTS students (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			email TEXT NOT NULL UNIQUE,
-			major TEXT,
-			year INTEGER CHECK (year >= 1 AND year <= 8),
+			id         INTEGER PRIMARY KEY AUTOINCREMENT,
+			name       TEXT NOT NULL,
+			email      TEXT NOT NULL UNIQUE,
+			major      TEXT,
+			year       INTEGER CHECK (year >= 1 AND year <= 8),
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
@@ -89,6 +88,79 @@ func bootstrapSchema(conn *sql.DB) error {
 		BEGIN
 			UPDATE students SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
 		END`,
+
+		// ── Sprint 2 ────────────────────────────────────────────
+		`CREATE TABLE IF NOT EXISTS clubs (
+			id          INTEGER PRIMARY KEY AUTOINCREMENT,
+			name        TEXT NOT NULL UNIQUE,
+			description TEXT NOT NULL DEFAULT '',
+			created_by  INTEGER NOT NULL,
+			created_at  DATETIME NOT NULL,
+			updated_at  DATETIME NOT NULL,
+			FOREIGN KEY (created_by) REFERENCES users(id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS club_members (
+			id        INTEGER PRIMARY KEY AUTOINCREMENT,
+			club_id   INTEGER NOT NULL,
+			user_id   INTEGER NOT NULL,
+			role      TEXT NOT NULL DEFAULT 'member',
+			joined_at DATETIME NOT NULL,
+			UNIQUE(club_id, user_id),
+			FOREIGN KEY (club_id) REFERENCES clubs(id),
+			FOREIGN KEY (user_id) REFERENCES users(id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS events (
+			id          INTEGER PRIMARY KEY AUTOINCREMENT,
+			club_id     INTEGER NOT NULL DEFAULT 0,
+			creator_id  INTEGER NOT NULL,
+			title       TEXT NOT NULL,
+			description TEXT NOT NULL DEFAULT '',
+			location    TEXT NOT NULL DEFAULT '',
+			date        DATETIME NOT NULL,
+			capacity    INTEGER NOT NULL DEFAULT 100,
+			created_at  DATETIME NOT NULL,
+			updated_at  DATETIME NOT NULL,
+			FOREIGN KEY (creator_id) REFERENCES users(id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS rsvps (
+			id         INTEGER PRIMARY KEY AUTOINCREMENT,
+			event_id   INTEGER NOT NULL,
+			user_id    INTEGER NOT NULL,
+			status     TEXT NOT NULL DEFAULT 'going',
+			created_at DATETIME NOT NULL,
+			UNIQUE(event_id, user_id),
+			FOREIGN KEY (event_id) REFERENCES events(id),
+			FOREIGN KEY (user_id)  REFERENCES users(id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS study_requests (
+			id           INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id      INTEGER NOT NULL,
+			course       TEXT NOT NULL,
+			topic        TEXT NOT NULL,
+			availability TEXT NOT NULL DEFAULT '',
+			skill_level  TEXT NOT NULL DEFAULT '',
+			matched      INTEGER NOT NULL DEFAULT 0,
+			created_at   DATETIME NOT NULL,
+			expires_at   DATETIME NOT NULL,
+			FOREIGN KEY (user_id) REFERENCES users(id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS study_groups (
+			id          INTEGER PRIMARY KEY AUTOINCREMENT,
+			course      TEXT NOT NULL,
+			topic       TEXT NOT NULL,
+			max_members INTEGER NOT NULL DEFAULT 5,
+			created_at  DATETIME NOT NULL,
+			expires_at  DATETIME NOT NULL
+		)`,
+		`CREATE TABLE IF NOT EXISTS study_group_members (
+			id             INTEGER PRIMARY KEY AUTOINCREMENT,
+			study_group_id INTEGER NOT NULL,
+			user_id        INTEGER NOT NULL,
+			joined_at      DATETIME NOT NULL,
+			UNIQUE(study_group_id, user_id),
+			FOREIGN KEY (study_group_id) REFERENCES study_groups(id),
+			FOREIGN KEY (user_id)        REFERENCES users(id)
+		)`,
 	}
 
 	for _, stmt := range statements {
@@ -104,7 +176,7 @@ func (d *DB) Close() error {
 	return d.conn.Close()
 }
 
-// ---------------- STUDENTS CRUD ----------------
+// ── Students CRUD ────────────────────────────────────────────────────────────
 
 type StudentRow struct {
 	ID        int    `json:"id"`
@@ -153,7 +225,6 @@ func (d *DB) GetStudent(id int) (*StudentRow, error) {
 		`SELECT id,name,email,major,year,created_at,updated_at FROM students WHERE id=?`,
 		id,
 	).Scan(&s.ID, &s.Name, &s.Email, &s.Major, &s.Year, &s.CreatedAt, &s.UpdatedAt)
-
 	if err != nil {
 		return nil, err
 	}

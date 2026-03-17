@@ -9,7 +9,7 @@ import (
 
 type contextKey string
 
-const userClaimsKey contextKey = "user_claims"
+const UserClaimsKey contextKey = "user_claims"
 
 func Auth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +31,7 @@ func Auth(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userClaimsKey, claims)
+		ctx := context.WithValue(r.Context(), UserClaimsKey, claims)
 		next(w, r.WithContext(ctx))
 	}
 }
@@ -41,6 +41,6 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func GetClaims(r *http.Request) (*auth.JWTClaims, bool) {
-	claims, ok := r.Context().Value(userClaimsKey).(*auth.JWTClaims)
+	claims, ok := r.Context().Value(UserClaimsKey).(*auth.JWTClaims)
 	return claims, ok
 }

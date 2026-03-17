@@ -34,13 +34,12 @@ Health-check API (/health)
 Frontend pages for landing, login, and register
 Successfully Completed
 
-Backend service runs successfully and is testable via curl and Postman
+Backend service runs successfully and is testable via curl 
 User registration and login implemented using bcrypt password hashing and JWT authentication
 Public feed listing endpoint implemented with pagination support
 Auth-protected feed post creation implemented
 Auth-protected student CRUD operations implemented (create, list, retrieve by ID, update, delete)
 Health endpoint implemented for service validation
-Initial frontend onboarding screens for landing, login, and register completed
 
 Backend demo video recorded
 
@@ -58,6 +57,6 @@ Reason: Dependent on finalized UI flows and matching logic; deferred to the next
 Moderation, reporting, and audit features
 Reason: Lower priority compared to delivering secure authentication and core feed functionality.
 
-Sprint 1 Summary
 
+Summary
 Sprint 1 focused on building a stable backend foundation and delivering core authentication and feed capabilities. The team successfully implemented secure login, JWT-based authorization, feed management, and student CRUD APIs. Foundational frontend onboarding pages were also completed. Advanced collaboration and moderation features have been scheduled for Sprint 2.
