@@ -63,74 +63,71 @@
         <h1 class="feed-title">Campus Feed</h1>
         <p class="feed-subtitle">See what's happening across campus</p>
         @if (canManageClubs()) {
-          <a mat-flat-button routerLink="/clubs/new">
-            <mat-icon>group_add</mat-icon>
-            Create Club
-          </a>
+        <a mat-flat-button routerLink="/clubs/new">
+          <mat-icon>group_add</mat-icon>
+          Create Club
+        </a>
         }
       </div>
 
       <!-- Loading -->
       @if (loading()) {
-        <div class="state-container">
-          <mat-spinner diameter="44" class="feed-spinner"></mat-spinner>
-          <p class="state-text">Loading posts…</p>
-        </div>
+      <div class="state-container">
+        <mat-spinner diameter="44" class="feed-spinner"></mat-spinner>
+        <p class="state-text">Loading posts…</p>
+      </div>
       }
 
       <!-- Error -->
       @if (error() && !loading()) {
-        <div class="state-container">
-          <mat-icon class="state-icon error-icon">error_outline</mat-icon>
-          <p class="state-text">Failed to load feed. Please try again.</p>
-        </div>
+      <div class="state-container">
+        <mat-icon class="state-icon error-icon">error_outline</mat-icon>
+        <p class="state-text">Failed to load feed. Please try again.</p>
+      </div>
       }
 
       <!-- Posts -->
       @if (!loading() && !error()) {
-        <div class="posts-list">
-          @for (post of posts(); track post.id) {
-            <div class="post-card">
-              <div class="post-header">
-                <div
-                  class="post-avatar"
-                  [style.background]="getAvatarColor(post.id)"
-                >
-                  {{ getInitials(post.name) }}
-                </div>
-                <div class="post-meta">
-                  <span class="post-author">{{ post.name }}</span>
-                  <span class="post-time">Just now</span>
-                </div>
-                <button mat-icon-button class="post-menu-btn">
-                  <mat-icon>more_horiz</mat-icon>
-                </button>
-              </div>
-              <p class="post-body">{{ post.description }}</p>
-              <div class="post-actions">
-                <button mat-button class="action-btn">
-                  <mat-icon>thumb_up</mat-icon>
-                  Like
-                </button>
-                <button mat-button class="action-btn">
-                  <mat-icon>chat_bubble_outline</mat-icon>
-                  Comment
-                </button>
-                <button mat-button class="action-btn">
-                  <mat-icon>share</mat-icon>
-                  Share
-                </button>
-              </div>
+      <div class="posts-list">
+        @for (post of posts(); track post.id) {
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-avatar" [style.background]="getAvatarColor(post.id)">
+              {{ getInitials(post.name) }}
             </div>
-          }
-
-          @if (posts().length === 0) {
-            <div class="state-container">
-              <mat-icon class="state-icon">inbox</mat-icon>
-              <p class="state-text">No posts yet. Check back soon!</p>
+            <div class="post-meta">
+              <span class="post-author">{{ post.name }}</span>
+              <span class="post-time">Just now</span>
             </div>
-          }
+            <button mat-icon-button class="post-menu-btn">
+              <mat-icon>more_horiz</mat-icon>
+            </button>
+          </div>
+          <p class="post-body">{{ post.description }}</p>
+          <div class="post-actions">
+            <button mat-button class="action-btn">
+              <mat-icon>thumb_up</mat-icon>
+              Like
+            </button>
+            <button mat-button class="action-btn">
+              <mat-icon>chat_bubble_outline</mat-icon>
+              Comment
+            </button>
+            <button mat-button class="action-btn">
+              <mat-icon>share</mat-icon>
+              Share
+            </button>
+          </div>
         </div>
+        }
+
+        @if (posts().length === 0) {
+        <div class="state-container">
+          <mat-icon class="state-icon">inbox</mat-icon>
+          <p class="state-text">No posts yet. Check back soon!</p>
+        </div>
+        }
+      </div>
       }
     </main>
   </div>
