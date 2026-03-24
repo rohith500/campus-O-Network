@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -48,16 +49,20 @@ export class Login {
     if (this.form.invalid) return;
     this.loading = true;
     this.errorMessage = '';
-    const { email, password } = this.form.value;
+    const email = this.form.get('email')?.value as string;
+    const password = this.form.get('password')?.value as string;
+
     this.auth.login(email, password).subscribe({
-      next: (res) => {
+      next: () => {
         this.loading = false;
-        if (res.success) this.router.navigate(['/feed']);
-        else this.errorMessage = 'Invalid credentials. Please try again.';
+        this.router.navigate(['/feed']);
       },
-      error: () => {
+      error: (error: HttpErrorResponse) => {
         this.loading = false;
-        this.errorMessage = 'Something went wrong. Please try again.';
+        this.errorMessage =
+          typeof error.error === 'string' && error.error.trim().length > 0
+            ? error.error
+            : 'Something went wrong. Please try again.';
       },
     });
   }
