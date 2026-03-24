@@ -1,0 +1,97 @@
+<mat-toolbar class="navbar">
+  <a routerLink="/feed" class="navbar-brand">
+    <mat-icon class="brand-icon">hub</mat-icon>
+    <span class="brand-name">CampusNet</span>
+  </a>
+  <span class="spacer"></span>
+  <a mat-button routerLink="/feed">Back to feed</a>
+</mat-toolbar>
+
+<div class="club-form-page">
+  <div class="club-form-card">
+    <h1 class="title">{{ isEditMode() ? 'Edit Club' : 'Create Club' }}</h1>
+
+    @if (initializing()) {
+      <div class="state-row">
+        <mat-spinner diameter="26"></mat-spinner>
+        <span>Loading club details...</span>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>Club name</mat-label>
+          <input matInput formControlName="name" maxlength="80" />
+          @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+            <mat-error>Club name is required</mat-error>
+          } @else if (form.get('name')?.hasError('minlength') && form.get('name')?.touched) {
+            <mat-error>Club name must be at least 2 characters</mat-error>
+          } @else if (form.get('name')?.hasError('maxlength') && form.get('name')?.touched) {
+            <mat-error>Club name must be at most 80 characters</mat-error>
+          } @else if (fieldErrors()['name']) {
+            <mat-error>{{ fieldErrors()['name'] }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>Description</mat-label>
+          <textarea
+            matInput
+            formControlName="description"
+            maxlength="500"
+            rows="5"
+          ></textarea>
+          @if (form.get('description')?.hasError('required') && form.get('description')?.touched) {
+            <mat-error>Description is required</mat-error>
+          } @else if (
+            form.get('description')?.hasError('maxlength') && form.get('description')?.touched
+          ) {
+            <mat-error>Description must be at most 500 characters</mat-error>
+          } @else if (fieldErrors()['description']) {
+            <mat-error>{{ fieldErrors()['description'] }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>Category (optional)</mat-label>
+          <input matInput formControlName="category" maxlength="40" />
+          @if (form.get('category')?.hasError('maxlength') && form.get('category')?.touched) {
+            <mat-error>Category must be at most 40 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>Tags (optional)</mat-label>
+          <input matInput formControlName="tags" maxlength="120" placeholder="e.g. coding, ai" />
+          @if (form.get('tags')?.hasError('maxlength') && form.get('tags')?.touched) {
+            <mat-error>Tags must be at most 120 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>Club image URL (optional)</mat-label>
+          <input matInput formControlName="imageUrl" maxlength="500" />
+          @if (form.get('imageUrl')?.hasError('maxlength') && form.get('imageUrl')?.touched) {
+            <mat-error>Image URL must be at most 500 characters</mat-error>
+          }
+        </mat-form-field>
+
+        @if (formError()) {
+          <div class="error-banner">
+            <mat-icon>error_outline</mat-icon>
+            <span>{{ formError() }}</span>
+          </div>
+        }
+
+        <div class="actions">
+          <a mat-stroked-button routerLink="/feed">Cancel</a>
+          <button mat-flat-button type="submit" [disabled]="loading()">
+            @if (loading()) {
+              <mat-spinner diameter="18"></mat-spinner>
+            }
+            <span>{{ isEditMode() ? 'Save Changes' : 'Create Club' }}</span>
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

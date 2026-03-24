@@ -62,6 +62,12 @@
       <div class="feed-header">
         <h1 class="feed-title">Campus Feed</h1>
         <p class="feed-subtitle">See what's happening across campus</p>
+        @if (canManageClubs()) {
+          <a mat-flat-button routerLink="/clubs/new">
+            <mat-icon>group_add</mat-icon>
+            Create Club
+          </a>
+        }
       </div>
 
       <!-- Loading -->

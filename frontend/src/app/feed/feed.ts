@@ -26,10 +26,14 @@ export class Feed implements OnInit {
   posts = signal<FeedPost[]>([]);
   loading = signal(true);
   error = signal(false);
+  canManageClubs = signal(false);
 
   constructor(private auth: AuthService) {}
 
   ngOnInit() {
+    const role = this.auth.getCurrentUserRole();
+    this.canManageClubs.set(role === 'admin' || role === 'ambassador');
+
     this.auth.getFeed().subscribe({
       next: (res) => {
         this.posts.set(res.posts);
