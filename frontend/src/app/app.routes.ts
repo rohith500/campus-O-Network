@@ -4,11 +4,25 @@ import { Login } from './auth/login/login';
 import { Register } from './auth/register/register';
 import { Feed } from './feed/feed';
 import { authGuard } from './core/auth.guard';
+import { roleGuard } from './core/role.guard';
+import { ClubForm } from './clubs/club-form/club-form';
 
 export const routes: Routes = [
   { path: '', component: Landing },
   { path: 'auth/login', component: Login },
   { path: 'auth/register', component: Register },
   { path: 'feed', component: Feed, canActivate: [authGuard] },
+  {
+    path: 'clubs/new',
+    component: ClubForm,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['admin', 'ambassador'] },
+  },
+  {
+    path: 'clubs/:id/edit',
+    component: ClubForm,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['admin', 'ambassador'] },
+  },
   { path: '**', redirectTo: '' },
 ];

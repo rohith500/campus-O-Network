@@ -5,12 +5,14 @@ import { Observable, tap } from 'rxjs';
 
 export interface AuthResponse {
   token: string;
-  user: {
-    id: number;
-    email: string;
-    name: string;
-    role: string;
-  };
+  user: AuthUser;
+}
+
+export interface AuthUser {
+  id: number;
+  email: string;
+  name: string;
+  role: string;
 }
 
 export interface FeedPost {
@@ -24,6 +26,7 @@ export interface FeedResponse {
 }
 
 const TOKEN_KEY = 'campusnet_token';
+const USER_KEY = 'campusnet_user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -40,13 +43,23 @@ export class AuthService {
   login(email: string, password: string): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(this.loginUrl, { email, password })
-      .pipe(tap((res) => localStorage.setItem(TOKEN_KEY, res.token)));
+      .pipe(
+        tap((res) => {
+          localStorage.setItem(TOKEN_KEY, res.token);
+          localStorage.setItem(USER_KEY, JSON.stringify(res.user));
+        }),
+      );
   }
 
   register(name: string, email: string, password: string): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(this.registerUrl, { name, email, password })
-      .pipe(tap((res) => localStorage.setItem(TOKEN_KEY, res.token)));
+      .pipe(
+        tap((res) => {
+          localStorage.setItem(TOKEN_KEY, res.token);
+          localStorage.setItem(USER_KEY, JSON.stringify(res.user));
+        }),
+      );
   }
 
   getFeed(): Observable<FeedResponse> {
@@ -57,12 +70,43 @@ export class AuthService {
     return localStorage.getItem(TOKEN_KEY);
   }
 
+  getCurrentUser(): AuthUser | null {
+    const rawUser = localStorage.getItem(USER_KEY);
+    if (!rawUser) return null;
+    try {
+      return JSON.parse(rawUser) as AuthUser;
+    } catch {
+      return null;
+    }
+  }
+
+  getCurrentUserRole(): string | null {
+    const userRole = this.getCurrentUser()?.role;
+    if (userRole) return userRole;
+
+    const token = this.getToken();
+    if (!token) return null;
+
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+
+    try {
+      const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/'))) as {
+        role?: string;
+      };
+      return decoded.role ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   isLoggedIn(): boolean {
     return !!this.getToken();
   }
 
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
     this.router.navigate(['/auth/login']);
   }
 }
