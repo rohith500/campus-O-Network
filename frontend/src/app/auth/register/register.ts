@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   AbstractControl,
   FormBuilder,
@@ -83,16 +84,19 @@ export class Register {
     }
     this.loading = true;
     this.errorMessage = '';
-    const { fullName, email, department, password } = this.form.value;
-    this.auth.register({ fullName, email, department, password }).subscribe({
-      next: (res) => {
+    const { fullName, email, password } = this.form.value;
+
+    this.auth.register(fullName, email, password).subscribe({
+      next: () => {
         this.loading = false;
-        if (res.success) this.router.navigate(['/feed']);
-        else this.errorMessage = 'Registration failed. Please try again.';
+        this.router.navigate(['/feed']);
       },
-      error: () => {
+      error: (error: HttpErrorResponse) => {
         this.loading = false;
-        this.errorMessage = 'Something went wrong. Please try again.';
+        this.errorMessage =
+          typeof error.error === 'string' && error.error.trim().length > 0
+            ? error.error
+            : 'Something went wrong. Please try again.';
       },
     });
   }
