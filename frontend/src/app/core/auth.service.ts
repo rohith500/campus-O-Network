@@ -1,11 +1,16 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
 export interface AuthResponse {
-  success: boolean;
   token: string;
+  user: {
+    id: number;
+    email: string;
+    name: string;
+    role: string;
+  };
 }
 
 export interface FeedPost {
@@ -20,15 +25,12 @@ export interface FeedResponse {
 
 const TOKEN_KEY = 'campusnet_token';
 
-// Use text/plain to avoid CORS preflight (simple request).
-// The mock API accepts any body format.
-const plainHeaders = new HttpHeaders({ 'Content-Type': 'text/plain' });
-
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly loginUrl = 'https://mocka.ouim.me/mock/9d0c668f/api/login';
-  private readonly registerUrl = 'https://mocka.ouim.me/mock/08ff61a4/api/register';
-  private readonly feedUrl = 'https://mocka.ouim.me/mock/f1b51d68/api/feed';
+  private readonly apiBase = 'http://localhost:8079';
+  private readonly loginUrl = `${this.apiBase}/auth/login`;
+  private readonly registerUrl = `${this.apiBase}/auth/register`;
+  private readonly feedUrl = `${this.apiBase}/feed`;
 
   constructor(
     private http: HttpClient,
@@ -37,18 +39,14 @@ export class AuthService {
 
   login(email: string, password: string): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(this.loginUrl, JSON.stringify({ email, password }), {
-        headers: plainHeaders,
-      })
-      .pipe(tap((res) => { if (res.success) localStorage.setItem(TOKEN_KEY, res.token); }));
+      .post<AuthResponse>(this.loginUrl, { email, password })
+      .pipe(tap((res) => localStorage.setItem(TOKEN_KEY, res.token)));
   }
 
-  register(body: Record<string, unknown>): Observable<AuthResponse> {
+  register(name: string, email: string, password: string): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(this.registerUrl, JSON.stringify(body), {
-        headers: plainHeaders,
-      })
-      .pipe(tap((res) => { if (res.success) localStorage.setItem(TOKEN_KEY, res.token); }));
+      .post<AuthResponse>(this.registerUrl, { name, email, password })
+      .pipe(tap((res) => localStorage.setItem(TOKEN_KEY, res.token)));
   }
 
   getFeed(): Observable<FeedResponse> {
