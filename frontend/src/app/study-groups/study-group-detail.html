@@ -1,0 +1,63 @@
+<div class="detail-page">
+    <a class="back-link" [routerLink]="['/study-groups']">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Study Groups
+    </a>
+
+    @if (loading()) {
+    <div class="state-card">
+        <mat-spinner diameter="36"></mat-spinner>
+        <p>Loading study group details...</p>
+    </div>
+    }
+
+    @if (errorMessage() && !loading()) {
+    <div class="state-card error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ errorMessage() }}</p>
+    </div>
+    }
+
+    @if (!loading() && group(); as group) {
+    <section class="detail-card">
+        <header>
+            <h1>{{ group.topic }}</h1>
+            <p>{{ group.course }}</p>
+        </header>
+
+        <div class="details-grid">
+            <div>
+                <h3>Schedule</h3>
+                <p>Day/Time fields are not exposed yet by backend.</p>
+            </div>
+            <div>
+                <h3>Participants</h3>
+                <p>{{ group.memberCount }}/{{ group.maxMembers }}</p>
+            </div>
+            <div>
+                <h3>Status</h3>
+                @if (group.archived) {
+                <p>Archived</p>
+                } @else if (group.isFull) {
+                <p>Full</p>
+                } @else {
+                <p>Active</p>
+                }
+            </div>
+        </div>
+
+        <div class="actions">
+            <button mat-raised-button type="button" [disabled]="actionBusy() || !canJoin(group)" (click)="join()">
+                Join
+            </button>
+            <button mat-stroked-button type="button" [disabled]="actionBusy() || !canLeave(group)" (click)="leave()">
+                Leave
+            </button>
+        </div>
+
+        @if (actionMessage()) {
+        <p class="action-note">{{ actionMessage() }}</p>
+        }
+    </section>
+    }
+</div>

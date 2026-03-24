@@ -4,5 +4,11 @@
     "changeOrigin": true,
     "secure": true,
     "logLevel": "debug"
+  },
+  "/study": {
+    "target": "http://localhost:8080",
+    "changeOrigin": true,
+    "secure": false,
+    "logLevel": "debug"
   }
 }

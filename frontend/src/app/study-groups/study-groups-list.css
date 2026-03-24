@@ -1,0 +1,151 @@
+:host {
+    display: block;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0e111b 0%, #1a2033 60%, #0f1a24 100%);
+    color: #e6ecff;
+    font-family: 'Inter', sans-serif;
+}
+
+.groups-page {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 28px 20px 40px;
+}
+
+.groups-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    letter-spacing: -0.03em;
+}
+
+.groups-header p {
+    margin: 8px 0 0;
+    color: #b0b9d8;
+}
+
+.filters-card {
+    margin-top: 18px;
+    background: rgba(10, 14, 24, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 16px;
+    backdrop-filter: blur(8px);
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: #bec7e6;
+}
+
+input {
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #f7f8ff;
+    padding: 10px 12px;
+    font: inherit;
+}
+
+input::placeholder {
+    color: #8d96ba;
+}
+
+.filters-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.state-card {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+}
+
+.state-card.error {
+    border-color: rgba(255, 117, 117, 0.45);
+    color: #ffc0c0;
+}
+
+.groups-grid {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.group-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.card-title-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+.group-card h2 {
+    margin: 0;
+    font-size: 1.03rem;
+}
+
+.course-label {
+    margin: 8px 0 0;
+    font-weight: 600;
+    color: #d0d8f5;
+}
+
+.meta {
+    margin: 6px 0 0;
+    color: #adb7d7;
+    font-size: 0.88rem;
+}
+
+.badge {
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.badge.active {
+    background: rgba(89, 244, 151, 0.16);
+    color: #72f3af;
+}
+
+.badge.full {
+    background: rgba(255, 181, 73, 0.16);
+    color: #ffd283;
+}
+
+.badge.archived {
+    background: rgba(201, 207, 224, 0.14);
+    color: #d6dcf5;
+}
+
+@media (max-width: 860px) {
+
+    .filters-grid,
+    .groups-grid {
+        grid-template-columns: 1fr;
+    }
+}

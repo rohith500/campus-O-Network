@@ -1,0 +1,82 @@
+<div class="groups-page">
+    <header class="groups-header">
+        <h1>Study Groups</h1>
+        <p>Find classmates by course/topic and join active groups.</p>
+    </header>
+
+    <section class="filters-card">
+        <form [formGroup]="filterForm" class="filters-grid">
+            <label>
+                Search
+                <input type="text" formControlName="search" placeholder="e.g., COP4600 pointers" />
+            </label>
+            <label>
+                Course
+                <input type="text" formControlName="course" placeholder="e.g., COP4600" />
+            </label>
+            <label>
+                Topic
+                <input type="text" formControlName="topic" placeholder="e.g., Dynamic Programming" />
+            </label>
+            <label>
+                Day/Time
+                <input type="text" formControlName="dayTime"
+                    placeholder="Best effort (backend schedule filters pending)" />
+            </label>
+        </form>
+
+        <div class="filters-actions">
+            <button mat-stroked-button type="button" (click)="clearFilters()">Clear</button>
+            <button mat-raised-button type="button" (click)="loadGroups()">Refresh</button>
+        </div>
+    </section>
+
+    @if (loading()) {
+    <div class="state-card">
+        <mat-spinner diameter="36"></mat-spinner>
+        <p>Loading study groups...</p>
+    </div>
+    }
+
+    @if (errorMessage() && !loading()) {
+    <div class="state-card error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ errorMessage() }}</p>
+    </div>
+    }
+
+    @if (!loading() && !errorMessage()) {
+    @if (filteredGroups().length === 0) {
+    <div class="state-card">
+        <mat-icon>search_off</mat-icon>
+        <p>No groups match these filters.</p>
+    </div>
+    } @else {
+    <section class="groups-grid">
+        @for (group of filteredGroups(); track group.id) {
+        <article class="group-card">
+            <div class="card-title-row">
+                <h2>{{ group.topic }}</h2>
+                @if (group.archived) {
+                <span class="badge archived">Archived</span>
+                } @else if (group.isFull) {
+                <span class="badge full">Full</span>
+                } @else {
+                <span class="badge active">Active</span>
+                }
+            </div>
+
+            <p class="course-label">{{ group.course }}</p>
+            <p class="meta">Members: {{ group.memberCount }}/{{ group.maxMembers }}</p>
+            <p class="meta">Expires: {{ group.expiresAt | date: 'medium' }}</p>
+
+            <a mat-button [routerLink]="['/study-groups', group.id]">
+                View Details
+                <mat-icon>arrow_forward</mat-icon>
+            </a>
+        </article>
+        }
+    </section>
+    }
+    }
+</div>
