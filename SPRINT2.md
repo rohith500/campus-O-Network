@@ -1,8 +1,10 @@
 # Sprint 2 Report – Campus-O-Network
 
-## Team
+### Backend Team
 - Nitin Avula – 12255254
 - Rohith Reddy Nama – 69965665
+
+**##BACKEND:**
 
 ## Sprint 2 Work Summary
 Sprint 2 focused on closing quality gaps from Sprint 1 and proving backend feature reliability with unit tests. The main risk identified in Sprint 1 feedback was that authentication existed but was not test-backed, which made implementation confidence unclear. This sprint adds explicit tests for auth flows and broadens handler coverage for feed, clubs, events, and study groups.
@@ -93,15 +95,9 @@ Sprint 2 focused on closing quality gaps from Sprint 1 and proving backend featu
 | Study handlers | 3 | `TestCreateStudyRequest_MissingCourse`, `TestJoinStudyGroup_NotFound` |
 | **Total new tests** | **30** |  |
 
-## Outcome
+## Outcome 
 This sprint resolves the Sprint 1 ambiguity around auth implementation by adding deterministic auth test coverage and expands backend test coverage across core collaboration features. The backend behavior is now easier to validate during grading and future regressions are easier to catch.
 Team Members
-
-### Backend Team
-
-Nitin Avula - 12255254
-
-Rohith Reddy Nama - 69965665
 
 ### Frontend Team
 
@@ -182,13 +178,6 @@ Events — Create/Edit Event (Organizer flow)
 
 Study Groups — Discovery + Details + Join/Leave workflow
 
-
-
-### Not Completed in Sprint 2 and Reasons
-
-Event Details and RSVP Workflow
-- need some changes on the backend side for this to work
-
 ## Unit tests
 
 - `frontend/src/app/app.spec.ts` — app creation and router-outlet render checks.
@@ -201,6 +190,6 @@ Event Details and RSVP Workflow
 - `frontend/cypress/e2e/spec.cy.ts` — sign-up flow (open register page, fill form, submit Create Account).
 
 
-### Sprint 2 Summary
+### Outcome
 
 Sprint 2 focused on adding full Clubs, Events, and Study Groups functionality to the frontend, including a consistent API client layer, shared typed data models, discovery + details pages, and membership/RSVP workflows. Cross-cutting UI improvements were also completed to ensure consistent loading states, notifications, and error handling across the new modules.
