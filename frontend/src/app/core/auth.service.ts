@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 
 export interface AuthResponse {
   token: string;
@@ -25,6 +25,14 @@ export interface FeedResponse {
   posts: FeedPost[];
 }
 
+interface FeedApiItem {
+  id?: number | string;
+  user_id?: number;
+  name?: string;
+  description?: string;
+  content?: string;
+}
+
 const TOKEN_KEY = 'campusnet_token';
 const USER_KEY = 'campusnet_user';
 
@@ -38,7 +46,7 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router,
-  ) {}
+  ) { }
 
   login(email: string, password: string): Observable<AuthResponse> {
     return this.http
@@ -63,7 +71,14 @@ export class AuthService {
   }
 
   getFeed(): Observable<FeedResponse> {
-    return this.http.get<FeedResponse>(this.feedUrl);
+    return this.http.get<FeedResponse | FeedApiItem[]>(this.feedUrl).pipe(
+      map((response) => {
+        const rawItems = Array.isArray(response) ? response : (response.posts ?? []);
+        return {
+          posts: rawItems.map((item, index) => this.mapFeedItem(item, index)),
+        };
+      }),
+    );
   }
 
   getToken(): string | null {
@@ -108,6 +123,14 @@ export class AuthService {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     this.router.navigate(['/auth/login']);
+  }
+
+  private mapFeedItem(item: FeedApiItem, index: number): FeedPost {
+    return {
+      id: String(item.id ?? index),
+      name: item.name ?? `User #${item.user_id ?? 'Unknown'}`,
+      description: item.description ?? item.content ?? '',
+    };
   }
 }
 

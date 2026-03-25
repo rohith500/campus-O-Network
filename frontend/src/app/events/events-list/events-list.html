@@ -1,0 +1,91 @@
+<div class="events-page">
+    <header class="events-header">
+        <div>
+            <h1>Upcoming Events</h1>
+            <p>Plan your campus activities with events sorted by start time.</p>
+        </div>
+        <div class="header-actions">
+            @if (canCreateEvents()) {
+            <a mat-flat-button routerLink="/events/new">
+                <mat-icon>add</mat-icon>
+                Create Event
+            </a>
+            }
+            <button mat-stroked-button type="button" (click)="loadEvents()">
+                <mat-icon>refresh</mat-icon>
+                Refresh
+            </button>
+        </div>
+    </header>
+
+    <section class="filters-card">
+        <form [formGroup]="filtersForm" class="filters-grid">
+            <label class="checkbox-row">
+                <input type="checkbox" formControlName="upcomingOnly" />
+                Upcoming only
+            </label>
+            <label>
+                Start date
+                <input type="date" formControlName="startDate" />
+            </label>
+            <label>
+                End date
+                <input type="date" formControlName="endDate" />
+            </label>
+            <label>
+                Club ID
+                <input type="text" formControlName="clubId" placeholder="Filter by club id" />
+            </label>
+            <label>
+                Organizer ID
+                <input type="text" formControlName="organizerId" placeholder="Filter by organizer id" />
+            </label>
+        </form>
+
+        <div class="filters-actions">
+            <button mat-stroked-button type="button" (click)="clearFilters()">Clear Filters</button>
+        </div>
+    </section>
+
+    @if (loading()) {
+    <div class="state-card">
+        <mat-spinner diameter="36"></mat-spinner>
+        <p>Loading events...</p>
+    </div>
+    }
+
+    @if (errorMessage() && !loading()) {
+    <div class="state-card error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ errorMessage() }}</p>
+    </div>
+    }
+
+    @if (!loading() && !errorMessage()) {
+    @if (filteredEvents().length === 0) {
+    <div class="state-card">
+        <mat-icon>event_busy</mat-icon>
+        <p>No events found for selected filters.</p>
+    </div>
+    } @else {
+    <section class="events-list">
+        @for (event of filteredEvents(); track event.id) {
+        <article class="event-card">
+            <div class="event-head">
+                <h2>{{ event.title }}</h2>
+                <span class="rsvp-badge" [attr.data-status]="event.rsvpStatus">{{ rsvpLabel(event.rsvpStatus) }}</span>
+            </div>
+            <p class="event-description">{{ event.description || 'No description provided.' }}</p>
+            <div class="event-meta">
+                <span><mat-icon>schedule</mat-icon>{{ formatEventDate(event.date) }}</span>
+                <span><mat-icon>place</mat-icon>{{ event.location || 'Location TBD' }}</span>
+                <span><mat-icon>groups</mat-icon>Capacity: {{ event.capacity || 'N/A' }}</span>
+                <span><mat-icon>apartment</mat-icon>Club: {{ event.clubId || 'N/A' }}</span>
+                <span><mat-icon>person</mat-icon>Organizer: {{ event.creatorId || 'N/A' }}</span>
+            </div>
+        </article>
+        }
+    </section>
+    }
+    }
+</div>

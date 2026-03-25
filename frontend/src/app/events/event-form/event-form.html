@@ -1,0 +1,119 @@
+<mat-toolbar class="navbar">
+    <a routerLink="/feed" class="navbar-brand">
+        <mat-icon class="brand-icon">hub</mat-icon>
+        <span class="brand-name">CampusNet</span>
+    </a>
+    <span class="spacer"></span>
+    <a mat-button routerLink="/feed">Back to feed</a>
+</mat-toolbar>
+
+<div class="event-form-page">
+    <div class="event-form-card">
+        <h1 class="title">{{ isEditMode() ? 'Edit Event' : 'Create Event' }}</h1>
+
+        @if (initializing()) {
+        <div class="state-row">
+            <mat-spinner diameter="26"></mat-spinner>
+            <span>Loading event details...</span>
+        </div>
+        } @else {
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+            <mat-form-field appearance="outline" class="field">
+                <mat-label>Title</mat-label>
+                <input matInput formControlName="title" maxlength="120" />
+                @if (form.get('title')?.hasError('minlength') && form.get('title')?.touched) {
+                <mat-error>Title must be at least 2 characters</mat-error>
+                } @else if (fieldErrors()['title']) {
+                <mat-error>{{ fieldErrors()['title'] }}</mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description" rows="5" maxlength="1000"></textarea>
+                @if (form.get('description')?.hasError('maxlength') && form.get('description')?.touched) {
+                <mat-error>Description must be at most 1000 characters</mat-error>
+                }
+            </mat-form-field>
+
+            <div class="grid-two">
+                <mat-form-field appearance="outline" class="field">
+                    <mat-label>Start date</mat-label>
+                    <input matInput type="date" formControlName="startDate" />
+                    @if (fieldErrors()['startDate']) {
+                    <mat-error>{{ fieldErrors()['startDate'] }}</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="field">
+                    <mat-label>End date</mat-label>
+                    <input matInput type="date" formControlName="endDate" />
+                    @if (fieldErrors()['endDate']) {
+                    <mat-error>{{ fieldErrors()['endDate'] }}</mat-error>
+                    }
+                </mat-form-field>
+            </div>
+
+            @if (form.hasError('dateOrder') && (form.get('startDate')?.touched || form.get('endDate')?.touched)) {
+            <div class="error-inline">End date must be after start date when provided.</div>
+            }
+
+            <mat-form-field appearance="outline" class="field">
+                <mat-label>Location</mat-label>
+                <input matInput formControlName="location" maxlength="120" />
+                @if (fieldErrors()['location']) {
+                <mat-error>{{ fieldErrors()['location'] }}</mat-error>
+                }
+            </mat-form-field>
+
+            <div class="grid-two">
+                <mat-form-field appearance="outline" class="field">
+                    <mat-label>Club ID (optional)</mat-label>
+                    <input matInput type="number" formControlName="clubId" min="1" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="field">
+                    <mat-label>Capacity (optional)</mat-label>
+                    <input matInput type="number" formControlName="capacity" min="1" />
+                    @if (fieldErrors()['capacity']) {
+                    <mat-error>{{ fieldErrors()['capacity'] }}</mat-error>
+                    }
+                </mat-form-field>
+            </div>
+
+            <p class="info-note">No field is required on the form. Backend validation messages will be shown after
+                submit.</p>
+
+            @if (isEditMode() && !backendSupportsEdit()) {
+            <div class="warning-banner">
+                <mat-icon>info</mat-icon>
+                <span>Editing and deleting events are not supported by the current backend routes.</span>
+            </div>
+            }
+
+            @if (formError()) {
+            <div class="error-banner">
+                <mat-icon>error_outline</mat-icon>
+                <span>{{ formError() }}</span>
+            </div>
+            }
+
+            <div class="actions">
+                @if (isEditMode()) {
+                <button mat-stroked-button type="button" [disabled]="loading() || !backendSupportsDelete()"
+                    (click)="onDelete()">
+                    Delete Event
+                </button>
+                }
+                <a mat-stroked-button routerLink="/feed">Cancel</a>
+                <button mat-flat-button type="submit" [disabled]="!canSubmit()">
+                    @if (loading()) {
+                    <mat-spinner diameter="18"></mat-spinner>
+                    }
+                    <span>{{ isEditMode() ? 'Save Changes' : 'Create Event' }}</span>
+                </button>
+            </div>
+        </form>
+        }
+    </div>
+</div>
