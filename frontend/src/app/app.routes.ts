@@ -8,6 +8,7 @@ import { roleGuard } from './core/role.guard';
 import { ClubForm } from './clubs/club-form/club-form';
 import { StudyGroupsList } from './study-groups/study-groups-list';
 import { StudyGroupDetail } from './study-groups/study-group-detail';
+import { EventForm } from './events/event-form/event-form';
 
 export const routes: Routes = [
   { path: '', component: Landing },
@@ -16,6 +17,18 @@ export const routes: Routes = [
   { path: 'feed', component: Feed, canActivate: [authGuard] },
   { path: 'study-groups', component: StudyGroupsList, canActivate: [authGuard] },
   { path: 'study-groups/:id', component: StudyGroupDetail, canActivate: [authGuard] },
+  {
+    path: 'events/new',
+    component: EventForm,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['admin', 'ambassador', 'organizer', 'club_admin'] },
+  },
+  {
+    path: 'events/:id/edit',
+    component: EventForm,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['admin', 'ambassador', 'organizer', 'club_admin'] },
+  },
   {
     path: 'clubs/new',
     component: ClubForm,

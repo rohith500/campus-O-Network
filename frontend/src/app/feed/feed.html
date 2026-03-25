@@ -42,7 +42,7 @@
           <mat-icon>groups</mat-icon>
           <span>Study Groups</span>
         </a>
-        <a class="nav-item">
+        <a class="nav-item" routerLink="/events/new">
           <mat-icon>event</mat-icon>
           <span>Events</span>
         </a>
@@ -89,6 +89,53 @@
       <!-- Posts -->
       @if (!loading() && !error()) {
       <div class="posts-list">
+        <div class="section-header">
+          <h2>Saved Events</h2>
+          <a mat-button routerLink="/events/new">
+            <mat-icon>add</mat-icon>
+            Create Event
+          </a>
+        </div>
+
+        @if (eventsError()) {
+        <div class="post-card muted-card">
+          <p class="post-body">Could not load events right now.</p>
+        </div>
+        } @else if (events().length === 0) {
+        <div class="post-card muted-card">
+          <p class="post-body">No events yet. Create one to see it here.</p>
+        </div>
+        } @else {
+        @for (event of events(); track event.id) {
+        <div class="post-card event-card">
+          <div class="post-header">
+            <div class="post-avatar event-avatar">
+              <mat-icon>event</mat-icon>
+            </div>
+            <div class="post-meta">
+              <span class="post-author">{{ event.title }}</span>
+              <span class="post-time">{{ formatEventDate(event.date) }}</span>
+            </div>
+            @if (event.id > 0) {
+            <a mat-icon-button [routerLink]="['/events', event.id, 'edit']" title="Edit Event">
+              <mat-icon>edit</mat-icon>
+            </a>
+            }
+          </div>
+
+          <p class="post-body">{{ event.description || 'No description provided.' }}</p>
+          <div class="event-meta-row">
+            <span><mat-icon>place</mat-icon>{{ event.location || 'TBD' }}</span>
+            <span><mat-icon>groups</mat-icon>Capacity: {{ event.capacity || 'N/A' }}</span>
+          </div>
+        </div>
+        }
+        }
+
+        <div class="section-header">
+          <h2>Posts</h2>
+        </div>
+
         @for (post of posts(); track post.id) {
         <div class="post-card">
           <div class="post-header">

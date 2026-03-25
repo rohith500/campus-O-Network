@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService, FeedPost } from '../core/auth.service';
+import { EventModel, EventService } from '../core/event.service';
 
 @Component({
   selector: 'app-feed',
@@ -24,11 +25,16 @@ import { AuthService, FeedPost } from '../core/auth.service';
 })
 export class Feed implements OnInit {
   posts = signal<FeedPost[]>([]);
+  events = signal<EventModel[]>([]);
   loading = signal(true);
   error = signal(false);
+  eventsError = signal(false);
   canManageClubs = signal(false);
 
-  constructor(private auth: AuthService) {}
+  constructor(
+    private auth: AuthService,
+    private eventsService: EventService,
+  ) { }
 
   ngOnInit() {
     const role = this.auth.getCurrentUserRole();
@@ -42,6 +48,15 @@ export class Feed implements OnInit {
       error: () => {
         this.error.set(true);
         this.loading.set(false);
+      },
+    });
+
+    this.eventsService.listEvents().subscribe({
+      next: (events) => {
+        this.events.set(events);
+      },
+      error: () => {
+        this.eventsError.set(true);
       },
     });
   }
@@ -63,5 +78,17 @@ export class Feed implements OnInit {
     const colors = ['#6C63FF', '#FF6584', '#43B89C', '#FF9F43', '#4ECDC4', '#A29BFE'];
     const index = id.charCodeAt(0) % colors.length;
     return colors[index];
+  }
+
+  formatEventDate(dateValue: string): string {
+    const parsed = new Date(dateValue);
+    if (Number.isNaN(parsed.getTime())) {
+      return 'Date TBD';
+    }
+    return parsed.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   }
 }
