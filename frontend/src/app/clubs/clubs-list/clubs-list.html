@@ -1,0 +1,118 @@
+<mat-toolbar class="navbar">
+  <a routerLink="/feed" class="navbar-brand">
+    <mat-icon class="brand-icon">hub</mat-icon>
+    <span class="brand-name">CampusNet</span>
+  </a>
+  <span class="spacer"></span>
+  @if (canManageClubs()) {
+    <a mat-flat-button routerLink="/clubs/new">
+      <mat-icon>group_add</mat-icon>
+      Create Club
+    </a>
+  }
+</mat-toolbar>
+
+<div class="clubs-page">
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <div class="clubs-header">
+    <h1>Clubs</h1>
+    <p>Browse and join campus clubs.</p>
+  </div>
+
+  <form [formGroup]="form" class="filter-grid" novalidate>
+    <mat-form-field appearance="outline" class="field">
+      <mat-label>Search clubs</mat-label>
+      <input matInput formControlName="search" placeholder="Search by name or description" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field">
+      <mat-label>Category (optional)</mat-label>
+      <input matInput formControlName="category" placeholder="e.g. tech" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field">
+      <mat-label>Tags (optional)</mat-label>
+      <input matInput formControlName="tags" placeholder="e.g. ai" />
+    </mat-form-field>
+  </form>
+
+  @if (loading()) {
+    <div class="state-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading clubs…</p>
+    </div>
+  } @else if (error()) {
+    <div class="state-container">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button (click)="loadClubs()">Retry</button>
+    </div>
+  } @else if (filteredClubs().length === 0) {
+    <div class="state-container">
+      <mat-icon>inbox</mat-icon>
+      <p>No clubs match your filters.</p>
+    </div>
+  } @else {
+    <div class="clubs-grid">
+      @for (club of pagedClubs(); track club.id) {
+        <mat-card class="club-card">
+          <mat-card-header>
+            <mat-card-title>{{ club.name }}</mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <p class="description">{{ club.description || 'No description available.' }}</p>
+            <p class="member-count">
+              Members:
+              @if (club.loadingMembership) {
+                <span>loading…</span>
+              } @else {
+                <span>{{ club.memberCount }}</span>
+              }
+            </p>
+            @if (club.actionError) {
+              <p class="action-error">{{ club.actionError }}</p>
+            }
+          </mat-card-content>
+
+          <mat-card-actions class="actions">
+            <a mat-stroked-button [routerLink]="['/clubs', club.id]">
+              <mat-icon>visibility</mat-icon>
+              View
+            </a>
+
+            @if (!club.isJoined) {
+              <button
+                mat-flat-button
+                (click)="joinClub(club.id)"
+                [disabled]="club.loadingMembership"
+              >
+                Join
+              </button>
+            } @else {
+              <button
+                mat-stroked-button
+                (click)="leaveClub(club.id)"
+                [disabled]="club.loadingMembership"
+              >
+                Leave
+              </button>
+            }
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+
+    <div class="pagination-row">
+      <button mat-stroked-button (click)="onPrevPage()" [disabled]="currentPage() <= 1">
+        Previous
+      </button>
+      <span>Page {{ currentPage() }} / {{ totalPages() }}</span>
+      <button mat-stroked-button (click)="onNextPage()" [disabled]="currentPage() >= totalPages()">
+        Next
+      </button>
+    </div>
+  }
+</div>

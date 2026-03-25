@@ -1,0 +1,28 @@
+<mat-toolbar class="navbar">
+  <a routerLink="/feed" class="navbar-brand">
+    <mat-icon>hub</mat-icon>
+    <span>CampusNet</span>
+  </a>
+  <span class="spacer"></span>
+  <a mat-button routerLink="/clubs">Back to clubs</a>
+</mat-toolbar>
+
+<div class="club-view-page">
+  @if (loading()) {
+    <div class="state-container">
+      <mat-spinner diameter="36"></mat-spinner>
+      <p>Loading club details…</p>
+    </div>
+  } @else if (error()) {
+    <div class="state-container">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (club()) {
+    <div class="club-card">
+      <h1>{{ club()!.name }}</h1>
+      <p>{{ club()!.description || 'No description available.' }}</p>
+      <p><strong>Member count:</strong> {{ memberCount() }}</p>
+    </div>
+  }
+</div>

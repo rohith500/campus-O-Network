@@ -6,12 +6,15 @@ import { Feed } from './feed/feed';
 import { authGuard } from './core/auth.guard';
 import { roleGuard } from './core/role.guard';
 import { ClubForm } from './clubs/club-form/club-form';
+import { ClubsList } from './clubs/clubs-list/clubs-list';
+import { ClubView } from './clubs/club-view/club-view';
 
 export const routes: Routes = [
   { path: '', component: Landing },
   { path: 'auth/login', component: Login },
   { path: 'auth/register', component: Register },
   { path: 'feed', component: Feed, canActivate: [authGuard] },
+  { path: 'clubs', component: ClubsList, canActivate: [authGuard] },
   {
     path: 'clubs/new',
     component: ClubForm,
@@ -24,5 +27,6 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { roles: ['admin', 'ambassador'] },
   },
+  { path: 'clubs/:id', component: ClubView, canActivate: [authGuard] },
   { path: '**', redirectTo: '' },
 ];
