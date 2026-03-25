@@ -1,11 +1,18 @@
 package middleware
-import "net/http"
 
-// Logger logs HTTP requests
+import (
+	"fmt"
+	"net/http"
+	"time"
+)
+
+// Logger logs HTTP requests with method, path, and duration
 func Logger(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		println("[LOG]", r.Method, r.URL.Path)
+		start := time.Now()
+		fmt.Printf("[%s] %s %s\n", time.Now().Format("2006-01-02 15:04:05"), r.Method, r.URL.Path)
 		next(w, r)
+		fmt.Printf("[%s] %s %s completed in %v\n", time.Now().Format("2006-01-02 15:04:05"), r.Method, r.URL.Path, time.Since(start))
 	}
 }
 
