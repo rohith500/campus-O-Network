@@ -9,6 +9,7 @@ import { ClubForm } from './clubs/club-form/club-form';
 import { StudyGroupsList } from './study-groups/study-groups-list';
 import { StudyGroupDetail } from './study-groups/study-group-detail';
 import { EventForm } from './events/event-form/event-form';
+import { EventsList } from './events/events-list/events-list';
 
 export const routes: Routes = [
   { path: '', component: Landing },
@@ -17,6 +18,7 @@ export const routes: Routes = [
   { path: 'feed', component: Feed, canActivate: [authGuard] },
   { path: 'study-groups', component: StudyGroupsList, canActivate: [authGuard] },
   { path: 'study-groups/:id', component: StudyGroupDetail, canActivate: [authGuard] },
+  { path: 'events', component: EventsList, canActivate: [authGuard] },
   {
     path: 'events/new',
     component: EventForm,
