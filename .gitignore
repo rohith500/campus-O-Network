@@ -40,3 +40,5 @@ build/
 # OS
 Thumbs.db
 .DS_Store
+backend/app.db
+backend/*.db
