@@ -94,6 +94,18 @@ Study Groups — Discovery + Details + Join/Leave workflow
 Event Details and RSVP Workflow
 - need some changes on the backend side for this to work
 
+## Unit tests
+
+- `frontend/src/app/app.spec.ts` — app creation and router-outlet render checks.
+- `frontend/src/app/core/auth.interceptor.spec.ts` — auth header added for API URLs and skipped for non-API URLs.
+- `frontend/src/app/core/role.guard.spec.ts` — role-based allow/deny + redirect to feed.
+- `frontend/src/app/core/api/api.utils.spec.ts` — params builder, pagination, and API error/result mapping.
+
+## Cypress test
+
+- `frontend/cypress/e2e/spec.cy.ts` — sign-up flow (open register page, fill form, submit Create Account).
+
+
 ### Sprint 2 Summary
 
 Sprint 2 focused on adding full Clubs, Events, and Study Groups functionality to the frontend, including a consistent API client layer, shared typed data models, discovery + details pages, and membership/RSVP workflows. Cross-cutting UI improvements were also completed to ensure consistent loading states, notifications, and error handling across the new modules.
