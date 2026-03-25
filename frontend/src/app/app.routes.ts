@@ -10,6 +10,8 @@ import { StudyGroupsList } from './study-groups/study-groups-list';
 import { StudyGroupDetail } from './study-groups/study-group-detail';
 import { EventForm } from './events/event-form/event-form';
 import { EventsList } from './events/events-list/events-list';
+import { ClubsList } from './clubs/clubs-list/clubs-list';
+import { ClubView } from './clubs/club-view/club-view';
 
 export const routes: Routes = [
   { path: '', component: Landing },
@@ -31,6 +33,7 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { roles: ['admin', 'ambassador', 'organizer', 'club_admin'] },
   },
+  { path: 'clubs', component: ClubsList, canActivate: [authGuard] },
   {
     path: 'clubs/new',
     component: ClubForm,
@@ -43,5 +46,6 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { roles: ['admin', 'ambassador'] },
   },
+  { path: 'clubs/:id', component: ClubView, canActivate: [authGuard] },
   { path: '**', redirectTo: '' },
 ];
