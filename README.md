@@ -19,3 +19,22 @@
 ## Members
 #### frontend --> Ashmit Sharma and Yash Chaudhari
 #### Backend --> Nitin Avula and Rohith Reddy Nama
+
+## Sprint 2
+
+### New Backend Features
+- Clubs API: list, create, get, join, leave
+- Events API: list, create, get, RSVP
+- Study Groups API: post requests, list/create/join groups
+
+### Running the Backend
+```bash
+cd backend
+go run cmd/api/main.go
+```
+
+### Running Backend Tests
+```bash
+cd backend
+go test ./internal/handlers/... -v
+```
