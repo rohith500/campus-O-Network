@@ -1,0 +1,98 @@
+<mat-toolbar class="navbar">
+  <a routerLink="/feed" class="navbar-brand">
+    <mat-icon>hub</mat-icon>
+    <span>CampusNet</span>
+  </a>
+  <span class="spacer"></span>
+  <a mat-button routerLink="/clubs">Back to clubs</a>
+</mat-toolbar>
+
+<div class="club-view-page">
+  @if (loading()) {
+    <div class="state-container">
+      <mat-spinner diameter="36"></mat-spinner>
+      <p>Loading club details…</p>
+    </div>
+  } @else if (error()) {
+    <div class="state-container">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-stroked-button (click)="retryLoad()">Retry</button>
+    </div>
+  } @else if (club()) {
+    <div class="club-card">
+      <div class="card-header">
+        <h1>{{ club()!.name }}</h1>
+        <div class="header-actions">
+          @if (!isMember()) {
+            <button mat-flat-button (click)="joinClub()" [disabled]="actionLoading()">
+              @if (actionLoading()) {
+                <mat-spinner diameter="18"></mat-spinner>
+              }
+              <span>Join Club</span>
+            </button>
+          } @else {
+            <button mat-stroked-button (click)="leaveClub()" [disabled]="actionLoading()">
+              @if (actionLoading()) {
+                <mat-spinner diameter="18"></mat-spinner>
+              }
+              <span>Leave Club</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <p class="description">{{ club()!.description || 'No description available.' }}</p>
+
+      <div class="metadata-grid">
+        <div class="meta-item">
+          <span class="meta-label">Created</span>
+          <span>{{ club()!.createdAt ? (club()!.createdAt | date: 'medium') : 'Unknown' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Members</span>
+          <span>{{ memberCount() }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Admins</span>
+          <span>{{ admins().length }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Tags</span>
+          <span>{{ tags().length > 0 ? tags().join(', ') : 'No tags available' }}</span>
+        </div>
+      </div>
+
+      @if (authError()) {
+        <div class="error-banner">
+          <mat-icon>lock</mat-icon>
+          <span>{{ authError() }}</span>
+          <button mat-button (click)="goToLogin()">Sign in</button>
+        </div>
+      }
+
+      @if (actionError()) {
+        <div class="error-banner">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ actionError() }}</span>
+        </div>
+      }
+
+      <div class="members-section">
+        <h2>Members</h2>
+        @if (members().length === 0) {
+          <p>No members yet.</p>
+        } @else {
+          <ul class="member-list">
+            @for (member of members(); track member.id) {
+              <li>
+                <span>User #{{ member.user_id }}</span>
+                <span class="member-role">{{ member.role || 'member' }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  }
+</div>
