@@ -18,46 +18,68 @@ import (
 )
 
 type mockDB struct {
-	clubs       []*models.Club
-	clubMembers []*models.ClubMember
-	events      []*models.Event
-	rsvps       []*models.RSVP
-	studyReqs   []*models.StudyRequest
-	studyGroups []*models.StudyGroup
-	sgMembers   []*models.StudyGroupMember
-	nextID      int
-	shouldFail  bool
+	users             []*models.User
+	posts             []*models.Post
+	clubs             []*models.Club
+	clubMembers       []*models.ClubMember
+	events            []*models.Event
+	rsvps             []*models.RSVP
+	studyReqs         []*models.StudyRequest
+	studyGroups       []*models.StudyGroup
+	sgMembers         []*models.StudyGroupMember
+	createUserErr     error
+	getUserByEmailErr error
+	createPostErr     error
+	getAllPostsErr    error
+	nextID            int
+	shouldFail        bool
 }
 
-func newMockDB() *mockDB { return &mockDB{nextID: 1} }
+func newMockDB() *mockDB      { return &mockDB{nextID: 1} }
 func (m *mockDB) autoID() int { id := m.nextID; m.nextID++; return id }
 
 func (m *mockDB) ListClubs() ([]*models.Club, error) {
-	if m.shouldFail { return nil, fmt.Errorf("db error") }
+	if m.shouldFail {
+		return nil, fmt.Errorf("db error")
+	}
 	return m.clubs, nil
 }
 func (m *mockDB) CreateClub(name, description string, createdBy int) (*models.Club, error) {
-	if m.shouldFail { return nil, fmt.Errorf("db error") }
+	if m.shouldFail {
+		return nil, fmt.Errorf("db error")
+	}
 	c := &models.Club{ID: m.autoID(), Name: name, Description: description, CreatedAt: time.Now(), UpdatedAt: time.Now()}
 	m.clubs = append(m.clubs, c)
 	return c, nil
 }
 func (m *mockDB) GetClubByID(id int) (*models.Club, error) {
-	for _, c := range m.clubs { if c.ID == id { return c, nil } }
+	for _, c := range m.clubs {
+		if c.ID == id {
+			return c, nil
+		}
+	}
 	return nil, fmt.Errorf("club not found")
 }
 func (m *mockDB) GetClubMembers(clubID int) ([]*models.ClubMember, error) {
 	var out []*models.ClubMember
-	for _, cm := range m.clubMembers { if cm.ClubID == clubID { out = append(out, cm) } }
+	for _, cm := range m.clubMembers {
+		if cm.ClubID == clubID {
+			out = append(out, cm)
+		}
+	}
 	return out, nil
 }
 func (m *mockDB) JoinClub(clubID, userID int, role string) error {
-	if m.shouldFail { return fmt.Errorf("db error") }
+	if m.shouldFail {
+		return fmt.Errorf("db error")
+	}
 	m.clubMembers = append(m.clubMembers, &models.ClubMember{ID: m.autoID(), ClubID: clubID, UserID: userID, Role: role, JoinedAt: time.Now()})
 	return nil
 }
 func (m *mockDB) LeaveClub(clubID, userID int) error {
-	if m.shouldFail { return fmt.Errorf("db error") }
+	if m.shouldFail {
+		return fmt.Errorf("db error")
+	}
 	for i, cm := range m.clubMembers {
 		if cm.ClubID == clubID && cm.UserID == userID {
 			m.clubMembers = append(m.clubMembers[:i], m.clubMembers[i+1:]...)
@@ -67,84 +89,166 @@ func (m *mockDB) LeaveClub(clubID, userID int) error {
 	return fmt.Errorf("membership not found")
 }
 func (m *mockDB) ListEvents(clubID int) ([]*models.Event, error) {
-	if m.shouldFail { return nil, fmt.Errorf("db error") }
+	if m.shouldFail {
+		return nil, fmt.Errorf("db error")
+	}
 	if clubID > 0 {
 		var out []*models.Event
-		for _, e := range m.events { if e.ClubID == clubID { out = append(out, e) } }
+		for _, e := range m.events {
+			if e.ClubID == clubID {
+				out = append(out, e)
+			}
+		}
 		return out, nil
 	}
 	return m.events, nil
 }
 func (m *mockDB) CreateEvent(clubID, creatorID int, title, description, location string, date time.Time, capacity int) (*models.Event, error) {
-	if m.shouldFail { return nil, fmt.Errorf("db error") }
+	if m.shouldFail {
+		return nil, fmt.Errorf("db error")
+	}
 	e := &models.Event{ID: m.autoID(), ClubID: clubID, CreatorID: creatorID, Title: title, Description: description, Location: location, Date: date, Capacity: capacity, CreatedAt: time.Now(), UpdatedAt: time.Now()}
 	m.events = append(m.events, e)
 	return e, nil
 }
 func (m *mockDB) GetEventByID(id int) (*models.Event, error) {
-	for _, e := range m.events { if e.ID == id { return e, nil } }
+	for _, e := range m.events {
+		if e.ID == id {
+			return e, nil
+		}
+	}
 	return nil, fmt.Errorf("event not found")
 }
 func (m *mockDB) RSVPEvent(eventID, userID int, status string) error {
-	if m.shouldFail { return fmt.Errorf("db error") }
+	if m.shouldFail {
+		return fmt.Errorf("db error")
+	}
 	m.rsvps = append(m.rsvps, &models.RSVP{ID: m.autoID(), EventID: eventID, UserID: userID, Status: status, CreatedAt: time.Now()})
 	return nil
 }
 func (m *mockDB) GetRSVPs(eventID int) ([]*models.RSVP, error) {
 	var out []*models.RSVP
-	for _, rv := range m.rsvps { if rv.EventID == eventID { out = append(out, rv) } }
+	for _, rv := range m.rsvps {
+		if rv.EventID == eventID {
+			out = append(out, rv)
+		}
+	}
 	return out, nil
 }
 func (m *mockDB) ListStudyRequests() ([]*models.StudyRequest, error) {
-	if m.shouldFail { return nil, fmt.Errorf("db error") }
+	if m.shouldFail {
+		return nil, fmt.Errorf("db error")
+	}
 	return m.studyReqs, nil
 }
 func (m *mockDB) CreateStudyRequest(userID int, course, topic, availability, skillLevel string) (*models.StudyRequest, error) {
-	if m.shouldFail { return nil, fmt.Errorf("db error") }
+	if m.shouldFail {
+		return nil, fmt.Errorf("db error")
+	}
 	sr := &models.StudyRequest{ID: m.autoID(), UserID: userID, Course: course, Topic: topic, Availability: availability, SkillLevel: skillLevel, Matched: false, CreatedAt: time.Now(), ExpiresAt: time.Now().Add(7 * 24 * time.Hour)}
 	m.studyReqs = append(m.studyReqs, sr)
 	return sr, nil
 }
 func (m *mockDB) ListStudyGroups() ([]*models.StudyGroup, error) {
-	if m.shouldFail { return nil, fmt.Errorf("db error") }
+	if m.shouldFail {
+		return nil, fmt.Errorf("db error")
+	}
 	return m.studyGroups, nil
 }
 func (m *mockDB) CreateStudyGroup(course, topic string, maxMembers int) (*models.StudyGroup, error) {
-	if m.shouldFail { return nil, fmt.Errorf("db error") }
+	if m.shouldFail {
+		return nil, fmt.Errorf("db error")
+	}
 	sg := &models.StudyGroup{ID: m.autoID(), Course: course, Topic: topic, MaxMembers: maxMembers, CreatedAt: time.Now(), ExpiresAt: time.Now().Add(30 * 24 * time.Hour)}
 	m.studyGroups = append(m.studyGroups, sg)
 	return sg, nil
 }
 func (m *mockDB) GetStudyGroupByID(id int) (*models.StudyGroup, error) {
-	for _, sg := range m.studyGroups { if sg.ID == id { return sg, nil } }
+	for _, sg := range m.studyGroups {
+		if sg.ID == id {
+			return sg, nil
+		}
+	}
 	return nil, fmt.Errorf("study group not found")
 }
 func (m *mockDB) JoinStudyGroup(groupID, userID int) error {
-	if m.shouldFail { return fmt.Errorf("db error") }
+	if m.shouldFail {
+		return fmt.Errorf("db error")
+	}
+	found := false
+	for _, sg := range m.studyGroups {
+		if sg.ID == groupID {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return fmt.Errorf("study group not found")
+	}
 	m.sgMembers = append(m.sgMembers, &models.StudyGroupMember{ID: m.autoID(), StudyGroupID: groupID, UserID: userID, JoinedAt: time.Now()})
 	return nil
 }
 func (m *mockDB) GetStudyGroupMembers(groupID int) ([]*models.StudyGroupMember, error) {
 	var out []*models.StudyGroupMember
-	for _, m2 := range m.sgMembers { if m2.StudyGroupID == groupID { out = append(out, m2) } }
+	for _, m2 := range m.sgMembers {
+		if m2.StudyGroupID == groupID {
+			out = append(out, m2)
+		}
+	}
 	return out, nil
 }
-func (m *mockDB) CreateUser(email, passwordHash, name, role string) (*models.User, error) { return nil, nil }
-func (m *mockDB) GetUserByID(id int) (*models.User, error)                                { return nil, nil }
-func (m *mockDB) GetUserByEmail(email string) (*models.User, error)                       { return nil, nil }
-func (m *mockDB) UpdateUser(id int, name, role string) error                              { return nil }
-func (m *mockDB) DeleteUser(id int) error                                                 { return nil }
-func (m *mockDB) CreatePost(userID int, content, tags string) (*models.Post, error)       { return nil, nil }
-func (m *mockDB) GetPostByID(id int) (*models.Post, error)                                { return nil, nil }
-func (m *mockDB) GetAllPosts(limit, offset int) ([]*models.Post, error)                   { return nil, nil }
-func (m *mockDB) UpdatePost(id int, content, tags string) error                           { return nil }
-func (m *mockDB) DeletePost(id int) error                                                 { return nil }
-func (m *mockDB) LikePost(id int) error                                                   { return nil }
-func (m *mockDB) CreateStudent(name, email, major string, year int) (int64, error)        { return 0, nil }
-func (m *mockDB) ListStudents() ([]db.StudentRow, error)                                  { return nil, nil }
-func (m *mockDB) GetStudent(id int) (*db.StudentRow, error)                               { return nil, nil }
-func (m *mockDB) UpdateStudent(id int, name, email, major string, year int) error         { return nil }
-func (m *mockDB) DeleteStudent(id int) error                                              { return nil }
+func (m *mockDB) CreateUser(email, passwordHash, name, role string) (*models.User, error) {
+	if m.createUserErr != nil {
+		return nil, m.createUserErr
+	}
+	u := &models.User{ID: m.autoID(), Email: email, Password: passwordHash, Name: name, Role: role, CreatedAt: time.Now(), UpdatedAt: time.Now()}
+	m.users = append(m.users, u)
+	return u, nil
+}
+func (m *mockDB) GetUserByID(id int) (*models.User, error) { return nil, nil }
+func (m *mockDB) GetUserByEmail(email string) (*models.User, error) {
+	if m.getUserByEmailErr != nil {
+		return nil, m.getUserByEmailErr
+	}
+	for _, u := range m.users {
+		if u.Email == email {
+			return u, nil
+		}
+	}
+	return nil, fmt.Errorf("user not found")
+}
+func (m *mockDB) UpdateUser(id int, name, role string) error { return nil }
+func (m *mockDB) DeleteUser(id int) error                    { return nil }
+func (m *mockDB) CreatePost(userID int, content, tags string) (*models.Post, error) {
+	if m.createPostErr != nil {
+		return nil, m.createPostErr
+	}
+	p := &models.Post{ID: m.autoID(), UserID: userID, Content: content, Tags: tags, Likes: 0, CreatedAt: time.Now(), UpdatedAt: time.Now()}
+	m.posts = append(m.posts, p)
+	return p, nil
+}
+func (m *mockDB) GetPostByID(id int) (*models.Post, error) { return nil, nil }
+func (m *mockDB) GetAllPosts(limit, offset int) ([]*models.Post, error) {
+	if m.getAllPostsErr != nil {
+		return nil, m.getAllPostsErr
+	}
+	if offset >= len(m.posts) {
+		return []*models.Post{}, nil
+	}
+	end := offset + limit
+	if end > len(m.posts) {
+		end = len(m.posts)
+	}
+	return m.posts[offset:end], nil
+}
+func (m *mockDB) UpdatePost(id int, content, tags string) error                    { return nil }
+func (m *mockDB) DeletePost(id int) error                                          { return nil }
+func (m *mockDB) LikePost(id int) error                                            { return nil }
+func (m *mockDB) CreateStudent(name, email, major string, year int) (int64, error) { return 0, nil }
+func (m *mockDB) ListStudents() ([]db.StudentRow, error)                           { return nil, nil }
+func (m *mockDB) GetStudent(id int) (*db.StudentRow, error)                        { return nil, nil }
+func (m *mockDB) UpdateStudent(id int, name, email, major string, year int) error  { return nil }
+func (m *mockDB) DeleteStudent(id int) error                                       { return nil }
 
 func authedReq(method, path string, body interface{}, userID int) *http.Request {
 	var buf bytes.Buffer
@@ -156,6 +260,224 @@ func authedReq(method, path string, body interface{}, userID int) *http.Request 
 	claims := &auth.JWTClaims{UserID: userID, Email: "test@ufl.edu", Role: "student"}
 	ctx := context.WithValue(req.Context(), middleware.UserClaimsKey, claims)
 	return req.WithContext(ctx)
+}
+
+// ── Auth Tests ───────────────────────────────────────────────────────────────
+
+func TestRegister_MethodNotAllowed(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := httptest.NewRequest(http.MethodGet, "/auth/register", nil)
+	rr := httptest.NewRecorder()
+	h.Register(rr, req)
+	if rr.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("expected 405, got %d", rr.Code)
+	}
+}
+
+func TestRegister_MissingFields(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := httptest.NewRequest(http.MethodPost, "/auth/register", bytes.NewBufferString(`{"email":"a@ufl.edu","password":"secret123"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	h.Register(rr, req)
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d", rr.Code)
+	}
+}
+
+func TestRegister_DBError(t *testing.T) {
+	mdb := newMockDB()
+	mdb.createUserErr = fmt.Errorf("insert failed")
+	h := handlers.New(mdb)
+	req := httptest.NewRequest(http.MethodPost, "/auth/register", bytes.NewBufferString(`{"email":"a@ufl.edu","password":"secret123","name":"Alice"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	h.Register(rr, req)
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d", rr.Code)
+	}
+}
+
+func TestRegister_Success(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := httptest.NewRequest(http.MethodPost, "/auth/register", bytes.NewBufferString(`{"email":"alice@ufl.edu","password":"secret123","name":"Alice"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	h.Register(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
+	}
+	var resp map[string]interface{}
+	if err := json.Unmarshal(rr.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("expected json body: %v", err)
+	}
+	if resp["token"] == "" || resp["token"] == nil {
+		t.Fatalf("expected token in response")
+	}
+}
+
+func TestLogin_MethodNotAllowed(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := httptest.NewRequest(http.MethodGet, "/auth/login", nil)
+	rr := httptest.NewRecorder()
+	h.Login(rr, req)
+	if rr.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("expected 405, got %d", rr.Code)
+	}
+}
+
+func TestLogin_MissingFields(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := httptest.NewRequest(http.MethodPost, "/auth/login", bytes.NewBufferString(`{"email":"alice@ufl.edu"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	h.Login(rr, req)
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d", rr.Code)
+	}
+}
+
+func TestLogin_UserNotFound(t *testing.T) {
+	mdb := newMockDB()
+	mdb.getUserByEmailErr = fmt.Errorf("not found")
+	h := handlers.New(mdb)
+	req := httptest.NewRequest(http.MethodPost, "/auth/login", bytes.NewBufferString(`{"email":"missing@ufl.edu","password":"secret123"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	h.Login(rr, req)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d", rr.Code)
+	}
+}
+
+func TestLogin_WrongPassword(t *testing.T) {
+	hash, err := auth.HashPassword("right-password")
+	if err != nil {
+		t.Fatalf("failed to hash password: %v", err)
+	}
+	mdb := newMockDB()
+	mdb.users = append(mdb.users, &models.User{ID: 1, Email: "alice@ufl.edu", Password: hash, Name: "Alice", Role: "student"})
+	h := handlers.New(mdb)
+	req := httptest.NewRequest(http.MethodPost, "/auth/login", bytes.NewBufferString(`{"email":"alice@ufl.edu","password":"wrong-password"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	h.Login(rr, req)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d", rr.Code)
+	}
+}
+
+func TestLogin_Success(t *testing.T) {
+	hash, err := auth.HashPassword("right-password")
+	if err != nil {
+		t.Fatalf("failed to hash password: %v", err)
+	}
+	mdb := newMockDB()
+	mdb.users = append(mdb.users, &models.User{ID: 1, Email: "alice@ufl.edu", Password: hash, Name: "Alice", Role: "student"})
+	h := handlers.New(mdb)
+	req := httptest.NewRequest(http.MethodPost, "/auth/login", bytes.NewBufferString(`{"email":"alice@ufl.edu","password":"right-password"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	h.Login(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
+	}
+	var resp map[string]interface{}
+	if err := json.Unmarshal(rr.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("expected json body: %v", err)
+	}
+	if resp["token"] == "" || resp["token"] == nil {
+		t.Fatalf("expected token in response")
+	}
+}
+
+// ── Feed Tests ───────────────────────────────────────────────────────────────
+
+func TestGetFeed_MethodNotAllowed(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := httptest.NewRequest(http.MethodPost, "/feed", nil)
+	rr := httptest.NewRecorder()
+	h.GetFeed(rr, req)
+	if rr.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("expected 405, got %d", rr.Code)
+	}
+}
+
+func TestGetFeed_Empty(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := httptest.NewRequest(http.MethodGet, "/feed", nil)
+	rr := httptest.NewRecorder()
+	h.GetFeed(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rr.Code)
+	}
+	var posts []models.Post
+	if err := json.Unmarshal(rr.Body.Bytes(), &posts); err != nil {
+		t.Fatalf("expected json array: %v", err)
+	}
+	if len(posts) != 0 {
+		t.Fatalf("expected 0 posts, got %d", len(posts))
+	}
+}
+
+func TestGetFeed_WithPosts(t *testing.T) {
+	mdb := newMockDB()
+	mdb.posts = append(mdb.posts,
+		&models.Post{ID: 1, UserID: 1, Content: "First post", Tags: "go"},
+		&models.Post{ID: 2, UserID: 2, Content: "Second post", Tags: "uf"},
+	)
+	h := handlers.New(mdb)
+	req := httptest.NewRequest(http.MethodGet, "/feed?limit=10&offset=0", nil)
+	rr := httptest.NewRecorder()
+	h.GetFeed(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rr.Code)
+	}
+	var posts []models.Post
+	if err := json.Unmarshal(rr.Body.Bytes(), &posts); err != nil {
+		t.Fatalf("expected json array: %v", err)
+	}
+	if len(posts) != 2 {
+		t.Fatalf("expected 2 posts, got %d", len(posts))
+	}
+}
+
+func TestCreatePost_Unauthorized(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := httptest.NewRequest(http.MethodPost, "/feed/create", bytes.NewBufferString(`{"content":"hello"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	h.CreatePost(rr, req)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d", rr.Code)
+	}
+}
+
+func TestCreatePost_MissingContent(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := authedReq(http.MethodPost, "/feed/create", map[string]string{"content": "   "}, 1)
+	rr := httptest.NewRecorder()
+	h.CreatePost(rr, req)
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d", rr.Code)
+	}
+}
+
+func TestCreatePost_Success(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := authedReq(http.MethodPost, "/feed/create", map[string]string{"content": "Hello UF", "tags": "announcement"}, 1)
+	rr := httptest.NewRecorder()
+	h.CreatePost(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
+	}
+	var post models.Post
+	if err := json.Unmarshal(rr.Body.Bytes(), &post); err != nil {
+		t.Fatalf("expected post json: %v", err)
+	}
+	if post.Content != "Hello UF" {
+		t.Fatalf("expected content Hello UF, got %q", post.Content)
+	}
 }
 
 // ── Club Tests ───────────────────────────────────────────────────────────────
@@ -248,6 +570,54 @@ func TestLeaveClub_Success(t *testing.T) {
 	}
 }
 
+func TestGetClub_Success(t *testing.T) {
+	mdb := newMockDB()
+	mdb.clubs = append(mdb.clubs, &models.Club{ID: 1, Name: "Go Club"})
+	mdb.clubMembers = append(mdb.clubMembers, &models.ClubMember{ID: 1, ClubID: 1, UserID: 2, Role: "member"})
+	h := handlers.New(mdb)
+	req := httptest.NewRequest(http.MethodGet, "/clubs/1", nil)
+	rr := httptest.NewRecorder()
+	h.GetClub(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestListClubs_WithData(t *testing.T) {
+	mdb := newMockDB()
+	mdb.clubs = append(mdb.clubs, &models.Club{ID: 1, Name: "Go Club"}, &models.Club{ID: 2, Name: "AI Club"})
+	h := handlers.New(mdb)
+	req := httptest.NewRequest(http.MethodGet, "/clubs", nil)
+	rr := httptest.NewRecorder()
+	h.ListClubs(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rr.Code)
+	}
+	var body struct {
+		OK    bool          `json:"ok"`
+		Clubs []models.Club `json:"clubs"`
+	}
+	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
+		t.Fatalf("expected json body: %v", err)
+	}
+	if len(body.Clubs) != 2 {
+		t.Fatalf("expected 2 clubs, got %d", len(body.Clubs))
+	}
+}
+
+func TestLeaveClub_NotMember(t *testing.T) {
+	mdb := newMockDB()
+	mdb.clubs = append(mdb.clubs, &models.Club{ID: 1, Name: "Go Club"})
+	h := handlers.New(mdb)
+	req := authedReq(http.MethodDelete, "/clubs/1/leave", nil, 99)
+	req.URL.Path = "/clubs/1/leave"
+	rr := httptest.NewRecorder()
+	h.LeaveClub(rr, req)
+	if rr.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", rr.Code)
+	}
+}
+
 // ── Event Tests ──────────────────────────────────────────────────────────────
 
 func TestListEvents_Empty(t *testing.T) {
@@ -307,6 +677,44 @@ func TestGetEvent_NotFound(t *testing.T) {
 	}
 }
 
+func TestGetEvent_Success(t *testing.T) {
+	mdb := newMockDB()
+	mdb.events = append(mdb.events, &models.Event{ID: 1, Title: "Hackathon", ClubID: 10, Date: time.Now().Add(24 * time.Hour)})
+	mdb.rsvps = append(mdb.rsvps, &models.RSVP{ID: 1, EventID: 1, UserID: 2, Status: "going"})
+	h := handlers.New(mdb)
+	req := httptest.NewRequest(http.MethodGet, "/events/1", nil)
+	rr := httptest.NewRecorder()
+	h.GetEvent(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestListEvents_FilterByClub(t *testing.T) {
+	mdb := newMockDB()
+	mdb.events = append(mdb.events,
+		&models.Event{ID: 1, ClubID: 1, Title: "Club 1 Event"},
+		&models.Event{ID: 2, ClubID: 2, Title: "Club 2 Event"},
+	)
+	h := handlers.New(mdb)
+	req := httptest.NewRequest(http.MethodGet, "/events?club_id=1", nil)
+	rr := httptest.NewRecorder()
+	h.ListEvents(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rr.Code)
+	}
+	var body struct {
+		OK     bool           `json:"ok"`
+		Events []models.Event `json:"events"`
+	}
+	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
+		t.Fatalf("expected json body: %v", err)
+	}
+	if len(body.Events) != 1 {
+		t.Fatalf("expected 1 event, got %d", len(body.Events))
+	}
+}
+
 func TestRSVPEvent_Success(t *testing.T) {
 	mdb := newMockDB()
 	mdb.events = append(mdb.events, &models.Event{ID: 1, Title: "Hackathon", Date: time.Now().Add(24 * time.Hour)})
@@ -330,6 +738,18 @@ func TestRSVPEvent_InvalidStatus(t *testing.T) {
 	h.RSVPEvent(rr, req)
 	if rr.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400, got %d", rr.Code)
+	}
+}
+
+func TestRSVPEvent_Unauthorized(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := httptest.NewRequest(http.MethodPost, "/events/1/rsvp", bytes.NewBufferString(`{"status":"going"}`))
+	req.Header.Set("Content-Type", "application/json")
+	req.URL.Path = "/events/1/rsvp"
+	rr := httptest.NewRecorder()
+	h.RSVPEvent(rr, req)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d", rr.Code)
 	}
 }
 
@@ -359,6 +779,17 @@ func TestCreateStudyRequest_Success(t *testing.T) {
 func TestCreateStudyRequest_MissingTopic(t *testing.T) {
 	h := handlers.New(newMockDB())
 	body := map[string]string{"course": "COP4600"}
+	req := authedReq(http.MethodPost, "/study/requests", body, 1)
+	rr := httptest.NewRecorder()
+	h.CreateStudyRequest(rr, req)
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d", rr.Code)
+	}
+}
+
+func TestCreateStudyRequest_MissingCourse(t *testing.T) {
+	h := handlers.New(newMockDB())
+	body := map[string]string{"course": "   ", "topic": "Graphs"}
 	req := authedReq(http.MethodPost, "/study/requests", body, 1)
 	rr := httptest.NewRecorder()
 	h.CreateStudyRequest(rr, req)
@@ -399,6 +830,31 @@ func TestCreateStudyGroup_DefaultMaxMembers(t *testing.T) {
 	}
 }
 
+func TestListStudyGroups_WithData(t *testing.T) {
+	mdb := newMockDB()
+	mdb.studyGroups = append(mdb.studyGroups,
+		&models.StudyGroup{ID: 1, Course: "CAP5771", Topic: "Neural Networks", MaxMembers: 5},
+		&models.StudyGroup{ID: 2, Course: "COP4600", Topic: "OS", MaxMembers: 4},
+	)
+	h := handlers.New(mdb)
+	req := httptest.NewRequest(http.MethodGet, "/study/groups", nil)
+	rr := httptest.NewRecorder()
+	h.ListStudyGroups(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rr.Code)
+	}
+	var body struct {
+		OK     bool                `json:"ok"`
+		Groups []models.StudyGroup `json:"groups"`
+	}
+	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
+		t.Fatalf("expected json body: %v", err)
+	}
+	if len(body.Groups) != 2 {
+		t.Fatalf("expected 2 groups, got %d", len(body.Groups))
+	}
+}
+
 func TestJoinStudyGroup_Success(t *testing.T) {
 	mdb := newMockDB()
 	mdb.studyGroups = append(mdb.studyGroups, &models.StudyGroup{ID: 1, Course: "CAP5771", Topic: "NNs", MaxMembers: 5, ExpiresAt: time.Now().Add(30 * 24 * time.Hour)})
@@ -420,5 +876,16 @@ func TestJoinStudyGroup_Unauthorized(t *testing.T) {
 	h.JoinStudyGroup(rr, req)
 	if rr.Code != http.StatusUnauthorized {
 		t.Fatalf("expected 401, got %d", rr.Code)
+	}
+}
+
+func TestJoinStudyGroup_NotFound(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := authedReq(http.MethodPost, "/study/groups/999/join", nil, 2)
+	req.URL.Path = "/study/groups/999/join"
+	rr := httptest.NewRecorder()
+	h.JoinStudyGroup(rr, req)
+	if rr.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", rr.Code)
 	}
 }
