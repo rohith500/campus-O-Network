@@ -82,6 +82,9 @@ func bootstrapSchema(conn *sql.DB) error {
 		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
 		`CREATE INDEX IF NOT EXISTS idx_feed_posts_user_id ON feed_posts(user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_feed_posts_created_at ON feed_posts(created_at DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_club_members_user_id ON club_members(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_events_date ON events(date)`,
+		`CREATE INDEX IF NOT EXISTS idx_study_requests_course ON study_requests(course)`,
 		`CREATE TRIGGER IF NOT EXISTS trg_students_updated_at
 		AFTER UPDATE ON students
 		FOR EACH ROW
