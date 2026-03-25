@@ -4,7 +4,7 @@
 - Nitin Avula – 12255254
 - Rohith Reddy Nama – 69965665
 
-**##BACKEND:**
+## BACKEND:
 
 ## Sprint 2 Work Summary
 Sprint 2 focused on closing quality gaps from Sprint 1 and proving backend feature reliability with unit tests. The main risk identified in Sprint 1 feedback was that authentication existed but was not test-backed, which made implementation confidence unclear. This sprint adds explicit tests for auth flows and broadens handler coverage for feed, clubs, events, and study groups.
@@ -97,7 +97,8 @@ Sprint 2 focused on closing quality gaps from Sprint 1 and proving backend featu
 
 ## Outcome 
 This sprint resolves the Sprint 1 ambiguity around auth implementation by adding deterministic auth test coverage and expands backend test coverage across core collaboration features. The backend behavior is now easier to validate during grading and future regressions are easier to catch.
-Team Members
+
+# 
 
 ### Frontend Team
 
@@ -106,10 +107,6 @@ Yash Chaudhari - 22603734
 Ashmit Sharma - 28381009
 
 ## FRONTEND:
-
-## Backlog from sprint 1
-
-Search page for student clubs - As an user i should be able to search for existing clubs
 
 ### Sprint 2 User Stories
 https://github.com/users/rohith500/projects/3/views/3
@@ -133,6 +130,9 @@ https://github.com/users/rohith500/projects/3/views/3
 
 9. Study Groups — Discovery + Details + Join/Leave workflow - As a student user I want to find and join study groups so that I can collaborate with peers for courses/topics.
 
+## Backlog from sprint 1
+
+Search page for student clubs - As an user i should be able to search for existing clubs (successfully implemented)
 
 ### Issues Planned for Sprint 2
 
