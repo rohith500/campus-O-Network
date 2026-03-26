@@ -1,6 +1,11 @@
 package handlers_test
 
 import (
+	"backend/internal/auth"
+	"backend/internal/db"
+	"backend/internal/handlers"
+	"backend/internal/middleware"
+	"backend/internal/models"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -9,12 +14,6 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
-
-	"backend/internal/auth"
-	"backend/internal/db"
-	"backend/internal/handlers"
-	"backend/internal/middleware"
-	"backend/internal/models"
 )
 
 type mockDB struct {
