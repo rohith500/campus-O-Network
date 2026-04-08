@@ -166,6 +166,7 @@ func bootstrapSchema(conn *sql.DB) error {
 		)`,
 
 		// ── Sprint 3 ────────────────────────────────────────────
+		`CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id)`,
 		`CREATE TABLE IF NOT EXISTS user_profiles (
 			id           INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id      INTEGER NOT NULL UNIQUE,
