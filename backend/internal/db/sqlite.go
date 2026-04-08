@@ -164,6 +164,29 @@ func bootstrapSchema(conn *sql.DB) error {
 			FOREIGN KEY (study_group_id) REFERENCES study_groups(id),
 			FOREIGN KEY (user_id)        REFERENCES users(id)
 		)`,
+
+		// ── Sprint 3 ────────────────────────────────────────────
+		`CREATE TABLE IF NOT EXISTS user_profiles (
+			id           INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id      INTEGER NOT NULL UNIQUE,
+			bio          TEXT NOT NULL DEFAULT '',
+			interests    TEXT NOT NULL DEFAULT '',
+			availability TEXT NOT NULL DEFAULT '',
+			skill_level  TEXT NOT NULL DEFAULT '',
+			created_at   DATETIME NOT NULL,
+			updated_at   DATETIME NOT NULL,
+			FOREIGN KEY (user_id) REFERENCES users(id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS comments (
+			id         INTEGER PRIMARY KEY AUTOINCREMENT,
+			post_id    INTEGER NOT NULL,
+			user_id    INTEGER NOT NULL,
+			content    TEXT NOT NULL,
+			created_at DATETIME NOT NULL,
+			updated_at DATETIME NOT NULL,
+			FOREIGN KEY (post_id) REFERENCES feed_posts(id),
+			FOREIGN KEY (user_id) REFERENCES users(id)
+		)`,
 	}
 
 	for _, stmt := range statements {

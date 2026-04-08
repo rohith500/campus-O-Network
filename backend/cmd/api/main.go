@@ -25,22 +25,51 @@ func main() {
 	h := handlers.New(database)
 	mux := http.NewServeMux()
 
-	// Health
+	// ── Health ──────────────────────────────────────────────
 	mux.HandleFunc("/health", middleware.CORS(h.Health))
 
-	// Auth
+	// ── Auth ────────────────────────────────────────────────
 	mux.HandleFunc("/auth/register", middleware.CORS(h.Register))
 	mux.HandleFunc("/auth/login", middleware.CORS(h.Login))
 
-	// Feed
+	// ── Profile (Sprint 3) ───────────────────────────────────
+	mux.HandleFunc("/profile", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			middleware.Auth(h.GetProfile)(w, r)
+		} else if r.Method == http.MethodPut {
+			middleware.Auth(h.UpdateProfile)(w, r)
+		} else {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))
+
+	// ── Feed ────────────────────────────────────────────────
 	mux.HandleFunc("/feed", middleware.CORS(h.GetFeed))
 	mux.HandleFunc("/feed/create", middleware.CORS(middleware.Auth(h.CreatePost)))
+	mux.HandleFunc("/feed/", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		if strings.HasSuffix(path, "/like") {
+			middleware.Auth(h.LikePost)(w, r)
+		} else if strings.HasSuffix(path, "/comments") {
+			if r.Method == http.MethodGet {
+				h.GetComments(w, r)
+			} else if r.Method == http.MethodPost {
+				middleware.Auth(h.CreateComment)(w, r)
+			} else {
+				http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			}
+		} else if strings.Contains(path, "/comments/") {
+			middleware.Auth(h.DeleteComment)(w, r)
+		} else {
+			http.Error(w, "not found", http.StatusNotFound)
+		}
+	}))
 
-	// Students
+	// ── Students ────────────────────────────────────────────
 	mux.HandleFunc("/students", middleware.CORS(middleware.Auth(h.Students)))
 	mux.HandleFunc("/students/", middleware.CORS(middleware.Auth(h.StudentsByID)))
 
-	// Clubs
+	// ── Clubs ────────────────────────────────────────────────
 	mux.HandleFunc("/clubs", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			h.ListClubs(w, r)
@@ -61,7 +90,7 @@ func main() {
 		}
 	}))
 
-	// Events
+	// ── Events ───────────────────────────────────────────────
 	mux.HandleFunc("/events", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			h.ListEvents(w, r)
@@ -79,7 +108,7 @@ func main() {
 		}
 	}))
 
-	// Study Groups
+	// ── Study Groups ─────────────────────────────────────────
 	mux.HandleFunc("/study/requests", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			h.ListStudyRequests(w, r)
@@ -104,6 +133,7 @@ func main() {
 		Addr:    ":" + cfg.Port,
 		Handler: mux,
 	}
+
 	if err := server.ListenAndServe(); err != nil {
 		fmt.Println("Server error:", err)
 	}
