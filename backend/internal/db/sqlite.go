@@ -177,6 +177,7 @@ func bootstrapSchema(conn *sql.DB) error {
 			updated_at   DATETIME NOT NULL,
 			FOREIGN KEY (user_id) REFERENCES users(id)
 		)`,
+		`CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id)`,
 		`CREATE TABLE IF NOT EXISTS comments (
 			id         INTEGER PRIMARY KEY AUTOINCREMENT,
 			post_id    INTEGER NOT NULL,
