@@ -1,0 +1,112 @@
+<section class="profile-page">
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <header class="profile-header">
+        <h1>My Profile</h1>
+        <p>Share your strengths and availability so peers can connect with you.</p>
+    </header>
+
+    @if (loading()) {
+    <div class="state-card">
+        <mat-icon>hourglass_top</mat-icon>
+        <p>Loading your profile...</p>
+    </div>
+    }
+
+    @if (!loading() && loadError()) {
+    <div class="state-card error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ loadError() }}</p>
+    </div>
+    }
+
+    @if (!loading() && !loadError()) {
+    <div class="profile-card">
+        @if (!isEditing() && hasSavedProfile()) {
+        <div class="profile-view">
+            <div class="view-header">
+                <h2>Profile Details</h2>
+                <button mat-stroked-button type="button" (click)="openEditForm()">
+                    <mat-icon>edit</mat-icon>
+                    Edit Profile
+                </button>
+            </div>
+
+            <div class="detail-item">
+                <p class="label">Name</p>
+                <p class="value">{{ displayValue(currentProfile()?.name ?? '', 'No name added yet.') }}</p>
+            </div>
+            <div class="detail-item">
+                <p class="label">Bio</p>
+                <p class="value">{{ displayValue(currentProfile()?.bio ?? '', 'No bio added yet.') }}</p>
+            </div>
+            <div class="detail-item">
+                <p class="label">Interests</p>
+                <p class="value">{{ displayValue(currentProfile()?.interests ?? '', 'No interests added yet.') }}</p>
+            </div>
+            <div class="detail-item">
+                <p class="label">Availability</p>
+                <p class="value">{{ displayValue(currentProfile()?.availability ?? '', 'No availability added yet.') }}
+                </p>
+            </div>
+            <div class="detail-item">
+                <p class="label">Skill Level</p>
+                <p class="value">{{ displayValue(currentProfile()?.skillLevel ?? '', 'Not specified yet.') }}</p>
+            </div>
+        </div>
+        } @else {
+        @if (!hasSavedProfile()) {
+        <div class="empty-note">
+            <mat-icon>info</mat-icon>
+            <span>No profile found yet. Fill this form to create your profile.</span>
+        </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="saveProfile()" class="profile-form">
+            <mat-form-field appearance="outline">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name" placeholder="How others should see your name" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Bio</mat-label>
+                <textarea matInput rows="4" formControlName="bio" placeholder="Tell others about yourself"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Interests</mat-label>
+                <input matInput formControlName="interests" placeholder="e.g. AI, Robotics, Football" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Availability</mat-label>
+                <input matInput formControlName="availability" placeholder="e.g. Weekdays after 6PM" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Skill Level</mat-label>
+                <input matInput formControlName="skillLevel" placeholder="e.g. Beginner, Intermediate, Advanced" />
+            </mat-form-field>
+
+            @if (saveError()) {
+            <p class="inline-error">{{ saveError() }}</p>
+            }
+
+            <div class="actions">
+                @if (hasSavedProfile()) {
+                <button mat-stroked-button type="button" (click)="cancelEdit()" [disabled]="saving()">Cancel</button>
+                }
+                <button mat-flat-button type="submit" [disabled]="!canSubmit()">
+                    @if (saving()) {
+                    Saving...
+                    } @else {
+                    Save Profile
+                    }
+                </button>
+            </div>
+        </form>
+        }
+    </div>
+    }
+</section>
