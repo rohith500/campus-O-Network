@@ -114,6 +114,14 @@ export class EventService {
             );
     }
 
+    rsvpEvent(eventId: number, status: 'going' | 'maybe' | 'not_going', token: string): Observable<{ status: string }> {
+        return this.http
+            .post<{ status?: string }>(`${this.apiBase}/events/${eventId}/rsvp`, { status }, {
+                headers: this.authHeaders(token),
+            })
+            .pipe(map((response) => ({ status: response.status ?? status })));
+    }
+
     updateEvent(eventId: number, payload: EventFormPayload, token: string): Observable<EventModel> {
         return this.http
             .put<EventResponse>(`${this.apiBase}/events/${eventId}`, this.toBackendPayload(payload), {

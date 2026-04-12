@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { MatButtonModule } from '@angular/material/button';
@@ -31,11 +32,14 @@ export class EventsList implements OnInit {
     private readonly fb = inject(FormBuilder);
     private readonly eventsService = inject(EventService);
     private readonly auth = inject(AuthService);
+    private readonly router = inject(Router);
 
     loading = signal(true);
     errorMessage = signal('');
     events = signal<EventListItem[]>([]);
     canCreateEvents = signal(false);
+    rsvpPendingByEventId = signal<Record<number, boolean>>({});
+    rsvpErrorByEventId = signal<Record<number, string>>({});
 
     readonly filtersForm = this.fb.nonNullable.group({
         upcomingOnly: true,
@@ -154,5 +158,95 @@ export class EventsList implements OnInit {
         if (status === 'maybe') return 'RSVP: Maybe';
         if (status === 'not_going') return 'RSVP: Not Going';
         return 'RSVP: None';
+    }
+
+    setRsvp(eventId: number, status: 'going' | 'maybe' | 'not_going'): void {
+        if (this.isRsvpPending(eventId)) {
+            return;
+        }
+
+        const token = this.auth.getToken();
+        if (!token) {
+            this.router.navigate(['/auth/login']);
+            return;
+        }
+
+        const current = this.events().find((event) => event.id === eventId);
+        if (!current) {
+            return;
+        }
+
+        const previousStatus = current.rsvpStatus;
+        this.updateEventRsvpStatus(eventId, status);
+        this.setRsvpPending(eventId, true);
+        this.setRsvpError(eventId, '');
+
+        this.eventsService.rsvpEvent(eventId, status, token).subscribe({
+            next: () => {
+                this.setRsvpPending(eventId, false);
+                this.setRsvpError(eventId, '');
+            },
+            error: (error: HttpErrorResponse) => {
+                this.updateEventRsvpStatus(eventId, previousStatus);
+                this.setRsvpPending(eventId, false);
+                this.setRsvpError(eventId, this.toRsvpErrorMessage(error));
+
+                if (error.status === 401) {
+                    this.router.navigate(['/auth/login']);
+                }
+            },
+        });
+    }
+
+    isRsvpPending(eventId: number): boolean {
+        return !!this.rsvpPendingByEventId()[eventId];
+    }
+
+    rsvpError(eventId: number): string {
+        return this.rsvpErrorByEventId()[eventId] ?? '';
+    }
+
+    isRsvpSelected(eventId: number, status: 'going' | 'maybe' | 'not_going'): boolean {
+        return this.events().some((event) => event.id === eventId && event.rsvpStatus === status);
+    }
+
+    private updateEventRsvpStatus(eventId: number, status: EventListItem['rsvpStatus']): void {
+        this.events.update((events) =>
+            events.map((event) =>
+                event.id === eventId
+                    ? {
+                        ...event,
+                        rsvpStatus: status,
+                    }
+                    : event,
+            ),
+        );
+    }
+
+    private setRsvpPending(eventId: number, pending: boolean): void {
+        this.rsvpPendingByEventId.update((state) => ({
+            ...state,
+            [eventId]: pending,
+        }));
+    }
+
+    private setRsvpError(eventId: number, message: string): void {
+        this.rsvpErrorByEventId.update((state) => ({
+            ...state,
+            [eventId]: message,
+        }));
+    }
+
+    private toRsvpErrorMessage(error: HttpErrorResponse): string {
+        if (error.status === 400) {
+            return 'Invalid RSVP status. Please choose Going, Maybe, or Not Going.';
+        }
+        if (error.status === 401) {
+            return 'Your session has expired. Please sign in again.';
+        }
+        if (error.status === 404) {
+            return 'Event not found. It may have been removed.';
+        }
+        return 'Failed to save RSVP. Please try again.';
     }
 }
