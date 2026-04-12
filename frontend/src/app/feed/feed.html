@@ -110,7 +110,7 @@
           <p class="post-body">No events yet. Create one to see it here.</p>
         </div>
         } @else {
-        @for (event of events(); track event.id) {
+        @for (event of events().slice(0, 3); track event.id) {
         <div class="post-card event-card">
           <div class="post-header">
             <div class="post-avatar event-avatar">
@@ -134,13 +134,62 @@
           </div>
         </div>
         }
+        @if (events().length > 3) {
+        <div class="events-overflow-link">
+          <a mat-button routerLink="/events">
+            <mat-icon>open_in_new</mat-icon>
+            See all saved events ({{ events().length }})
+          </a>
+        </div>
+        }
         }
 
         <div class="section-header">
           <h2>Posts</h2>
+          <button mat-flat-button type="button" (click)="toggleComposer()">
+            <mat-icon>{{ composerExpanded() ? 'expand_less' : 'add' }}</mat-icon>
+            {{ composerExpanded() ? 'Hide Composer' : 'New Post' }}
+          </button>
         </div>
 
-        @for (post of posts(); track post.id) {
+        @if (composerExpanded()) {
+        <div class="post-card composer-card">
+          <h3 class="composer-title">Share an update</h3>
+          <textarea
+            class="composer-input"
+            placeholder="What's happening on campus?"
+            [value]="composerContent()"
+            (input)="updateComposerContent($any($event.target).value)"
+          ></textarea>
+          <input
+            class="composer-tags-input"
+            type="text"
+            placeholder="Optional tags (comma separated)"
+            [value]="composerTags()"
+            (input)="updateComposerTags($any($event.target).value)"
+          />
+
+          @if (composerError()) {
+          <p class="inline-error">{{ composerError() }}</p>
+          }
+
+          <div class="composer-actions">
+            <button mat-stroked-button type="button" [disabled]="composerSubmitting()" (click)="toggleComposer()">
+              Cancel
+            </button>
+            <button mat-flat-button type="button" [disabled]="composerSubmitting()" (click)="submitPost()">
+              @if (composerSubmitting()) {
+              <mat-spinner diameter="16"></mat-spinner>
+              Publishing...
+              } @else {
+              Publish
+              }
+            </button>
+          </div>
+        </div>
+        }
+
+        @for (post of pagedPosts(); track post.id) {
         <div class="post-card">
           <div class="post-header">
             <div class="post-avatar" [style.background]="getAvatarColor(post.id)">
@@ -156,19 +205,111 @@
           </div>
           <p class="post-body">{{ post.description }}</p>
           <div class="post-actions">
-            <button mat-button class="action-btn">
+            <button mat-button class="action-btn" [disabled]="likePending(post.id) || hasLiked(post.id)" (click)="likePost(post.id)">
               <mat-icon>thumb_up</mat-icon>
-              Like
+              {{ hasLiked(post.id) ? 'Liked' : 'Like' }} {{ post.likes }}
             </button>
-            <button mat-button class="action-btn">
+            <button mat-button class="action-btn" (click)="toggleComments(post.id)">
               <mat-icon>chat_bubble_outline</mat-icon>
-              Comment
+              {{ commentsOpen(post.id) ? 'Hide Comments' : 'Comments' }}
             </button>
             <button mat-button class="action-btn">
               <mat-icon>share</mat-icon>
               Share
             </button>
           </div>
+
+          @if (likeError(post.id)) {
+          <p class="inline-error">{{ likeError(post.id) }}</p>
+          }
+
+          @if (commentsOpen(post.id)) {
+          <div class="comments-panel">
+            @if (commentsLoading(post.id)) {
+            <div class="comments-state">
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Loading comments...</span>
+            </div>
+            } @else {
+            @if (commentsForPost(post.id).length === 0) {
+            <p class="comments-empty">No comments yet - be the first!</p>
+            } @else {
+            <div class="comments-list">
+              @for (comment of commentsForPost(post.id); track comment.id) {
+              <div class="comment-item">
+                <div class="comment-head">
+                  <span class="comment-author">{{ commentAuthor(comment) }}</span>
+                  <span class="comment-time">{{ formatCommentTime(comment.createdAt) }}</span>
+                </div>
+                <p class="comment-content">{{ comment.content }}</p>
+                @if (canDeleteComment(comment)) {
+                <button
+                  mat-icon-button
+                  class="delete-comment-btn"
+                  [disabled]="deletingComment(comment.id)"
+                  (click)="deleteComment(post.id, comment.id)"
+                  title="Delete comment"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+                }
+              </div>
+              }
+            </div>
+            }
+
+            <div class="comment-form">
+              <textarea
+                class="comment-input"
+                placeholder="Write a comment..."
+                [value]="commentDraft(post.id)"
+                (input)="updateCommentDraft(post.id, $any($event.target).value)"
+              ></textarea>
+              <button
+                mat-flat-button
+                class="comment-submit-btn"
+                [disabled]="commentSubmitting(post.id)"
+                (click)="createComment(post.id)"
+              >
+                {{ commentSubmitting(post.id) ? 'Posting...' : 'Post Comment' }}
+              </button>
+            </div>
+
+            @if (commentsError(post.id)) {
+            <p class="inline-error">{{ commentsError(post.id) }}</p>
+            }
+            }
+          </div>
+          }
+        </div>
+        }
+
+        @if (totalPostPages() > 1) {
+        <div class="posts-pagination">
+          <button mat-stroked-button type="button" [disabled]="currentPostsPage() === 1" (click)="prevPostPage()">
+            Prev
+          </button>
+          <div class="page-number-list">
+            @for (page of postPageNumbers(); track page) {
+            <button
+              mat-button
+              type="button"
+              class="page-number-btn"
+              [class.active]="page === currentPostsPage()"
+              (click)="goToPostPage(page)"
+            >
+              {{ page }}
+            </button>
+            }
+          </div>
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="currentPostsPage() === totalPostPages()"
+            (click)="nextPostPage()"
+          >
+            Next
+          </button>
         </div>
         }
 

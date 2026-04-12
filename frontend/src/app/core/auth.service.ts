@@ -16,9 +16,13 @@ export interface AuthUser {
 }
 
 export interface FeedPost {
-  id: string;
+  id: number;
+  userId: number;
   name: string;
   description: string;
+  likes: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface FeedResponse {
@@ -27,10 +31,23 @@ export interface FeedResponse {
 
 interface FeedApiItem {
   id?: number | string;
+  ID?: number | string;
   user_id?: number;
+  userId?: number;
+  UserID?: number;
   name?: string;
+  Name?: string;
   description?: string;
   content?: string;
+  Content?: string;
+  likes?: number;
+  Likes?: number;
+  created_at?: string;
+  createdAt?: string;
+  CreatedAt?: string;
+  updated_at?: string;
+  updatedAt?: string;
+  UpdatedAt?: string;
 }
 
 const TOKEN_KEY = 'campusnet_token';
@@ -126,10 +143,16 @@ export class AuthService {
   }
 
   private mapFeedItem(item: FeedApiItem, index: number): FeedPost {
+    const numericId = Number(item.id ?? item.ID ?? index);
+    const userId = Number(item.user_id ?? item.userId ?? item.UserID ?? 0);
     return {
-      id: String(item.id ?? index),
-      name: item.name ?? `User #${item.user_id ?? 'Unknown'}`,
-      description: item.description ?? item.content ?? '',
+      id: Number.isNaN(numericId) ? index : numericId,
+      userId,
+      name: item.name ?? item.Name ?? `User #${userId || 'Unknown'}`,
+      description: item.description ?? item.content ?? item.Content ?? '',
+      likes: Number(item.likes ?? item.Likes ?? 0),
+      createdAt: item.created_at ?? item.createdAt ?? item.CreatedAt,
+      updatedAt: item.updated_at ?? item.updatedAt ?? item.UpdatedAt,
     };
   }
 }
