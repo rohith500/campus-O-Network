@@ -1,0 +1,51 @@
+<div class="request-form-page">
+    <header class="request-form-header">
+        <h1>Post Study Request</h1>
+        <p>Create a request so classmates can find you by course or topic.</p>
+    </header>
+
+    <section class="form-card">
+        <form [formGroup]="form" (ngSubmit)="submit()" class="request-form">
+            <label>
+                Course
+                <input type="text" formControlName="course" placeholder="e.g., COP4600" />
+                @if (hasError('course', 'required')) {
+                <span class="inline-error">Course is required.</span>
+                }
+            </label>
+
+            <label>
+                Topic
+                <input type="text" formControlName="topic" placeholder="e.g., Final review session" />
+                @if (hasError('topic', 'required')) {
+                <span class="inline-error">Topic is required.</span>
+                }
+            </label>
+
+            <label>
+                Availability
+                <input type="text" formControlName="availability" placeholder="e.g., Tue/Thu after 6PM" />
+            </label>
+
+            <label>
+                Skill Level
+                <input type="text" formControlName="skillLevel" placeholder="e.g., Beginner" />
+            </label>
+
+            @if (submitError()) {
+            <p class="submit-error">{{ submitError() }}</p>
+            }
+
+            <div class="actions">
+                <a mat-stroked-button routerLink="/study/requests" [attr.aria-disabled]="saving()">Cancel</a>
+                <button mat-flat-button type="submit" [disabled]="saving()">
+                    @if (saving()) {
+                    Posting...
+                    } @else {
+                    Post Request
+                    }
+                </button>
+            </div>
+        </form>
+    </section>
+</div>

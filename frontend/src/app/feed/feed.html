@@ -6,6 +6,9 @@
   </div>
   <span class="spacer"></span>
   <div class="nav-actions">
+    <button mat-icon-button class="nav-icon-btn" title="Profile" routerLink="/profile">
+      <mat-icon>person</mat-icon>
+    </button>
     <button mat-icon-button class="nav-icon-btn" title="Notifications">
       <mat-icon>notifications</mat-icon>
     </button>
@@ -28,9 +31,9 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-card">
-        <div class="sidebar-avatar">U</div>
-        <p class="sidebar-name">Welcome back!</p>
-        <p class="sidebar-meta">CampusNet member</p>
+        <div class="sidebar-avatar">{{ getInitials(sidebarName()) }}</div>
+        <p class="sidebar-name">Welcome back, {{ sidebarName() }}!</p>
+        <p class="sidebar-meta">{{ sidebarBio() }}</p>
       </div>
 
       <nav class="sidebar-nav">
@@ -42,10 +45,24 @@
           <mat-icon>groups</mat-icon>
           <span>Study Groups</span>
         </a>
+        <a class="nav-item" routerLink="/study/requests">
+          <mat-icon>library_books</mat-icon>
+          <span>Study Requests</span>
+        </a>
         <a class="nav-item" routerLink="/events">
           <mat-icon>event</mat-icon>
           <span>Events</span>
         </a>
+        <a class="nav-item" routerLink="/profile">
+          <mat-icon>badge</mat-icon>
+          <span>Profile</span>
+        </a>
+        @if (canManageStudents()) {
+        <a class="nav-item" routerLink="/students">
+          <mat-icon>school</mat-icon>
+          <span>Students</span>
+        </a>
+        }
         <a class="nav-item" routerLink="/clubs">
           <mat-icon>groups</mat-icon>
           <span>Clubs</span>

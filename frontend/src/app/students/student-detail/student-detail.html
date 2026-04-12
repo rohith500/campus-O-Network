@@ -1,0 +1,51 @@
+<section class="student-detail-page">
+    <header class="student-detail-header">
+        <a mat-stroked-button routerLink="/students">
+            <mat-icon>arrow_back</mat-icon>
+            Back to Directory
+        </a>
+
+        @if (student()) {
+        <div class="header-actions">
+            <a mat-stroked-button [routerLink]="['/students', student()!.id, 'edit']">
+                <mat-icon>edit</mat-icon>
+                Edit
+            </a>
+            <button mat-flat-button type="button" (click)="onDelete()" [disabled]="deleting()">
+                <mat-icon>delete</mat-icon>
+                {{ deleting() ? 'Deleting...' : 'Delete' }}
+            </button>
+        </div>
+        }
+    </header>
+
+    @if (loading()) {
+    <div class="state-box">
+        <p>Loading student details...</p>
+    </div>
+    } @else if (error()) {
+    <div class="state-box error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ error() }}</p>
+        <button mat-stroked-button type="button" (click)="loadStudent()">Retry</button>
+    </div>
+    } @else if (student()) {
+    <article class="student-card">
+        <h1>{{ student()!.name }}</h1>
+        <div class="detail-grid">
+            <div>
+                <p class="label">Email</p>
+                <p class="value">{{ student()!.email }}</p>
+            </div>
+            <div>
+                <p class="label">Major</p>
+                <p class="value">{{ student()!.major || 'N/A' }}</p>
+            </div>
+            <div>
+                <p class="label">Year</p>
+                <p class="value">{{ student()!.year || 'N/A' }}</p>
+            </div>
+        </div>
+    </article>
+    }
+</section>

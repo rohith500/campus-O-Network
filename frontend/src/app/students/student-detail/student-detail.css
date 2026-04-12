@@ -1,0 +1,81 @@
+:host {
+    display: block;
+    min-height: 100vh;
+    background: #0a0a12;
+    color: #f0f0ff;
+    font-family: 'Inter', sans-serif;
+}
+
+.student-detail-page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 18px 40px;
+}
+
+.student-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.student-card {
+    margin-top: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: #16162a;
+    padding: 16px;
+}
+
+.student-card h1 {
+    margin: 0 0 12px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.label {
+    margin: 0;
+    color: #8e95bc;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.value {
+    margin: 4px 0 0;
+}
+
+.state-box {
+    margin-top: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: #16162a;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.state-box.error {
+    color: #ff9fb5;
+    border-color: rgba(255, 101, 132, 0.4);
+}
+
+@media (max-width: 620px) {
+    .student-detail-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+}

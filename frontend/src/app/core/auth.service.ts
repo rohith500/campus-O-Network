@@ -95,6 +95,16 @@ export class AuthService {
     }
   }
 
+  updateCurrentUserName(name: string): void {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+
+    const current = this.getCurrentUser();
+    if (!current) return;
+
+    localStorage.setItem(USER_KEY, JSON.stringify({ ...current, name: trimmed }));
+  }
+
   getCurrentUserRole(): string | null {
     const userRole = this.getCurrentUser()?.role;
     if (userRole) return userRole;
