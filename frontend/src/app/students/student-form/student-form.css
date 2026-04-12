@@ -1,0 +1,49 @@
+:host {
+    display: block;
+    min-height: 100vh;
+    background: #0a0a12;
+    color: #f0f0ff;
+    font-family: 'Inter', sans-serif;
+}
+
+.student-form-page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 18px 40px;
+}
+
+.student-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.student-form {
+    margin-top: 14px;
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #16162a;
+}
+
+.error-text {
+    margin: 0;
+    color: #ff9fb5;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.state-box {
+    margin-top: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #16162a;
+    border-radius: 12px;
+    padding: 12px;
+}

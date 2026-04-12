@@ -1,8 +1,64 @@
 <div class="groups-page">
     <header class="groups-header">
-        <h1>Study Groups</h1>
-        <p>Find classmates by course/topic and join active groups.</p>
+        <div>
+            <h1>Study Groups</h1>
+            <p>Find classmates by course/topic and join active groups.</p>
+        </div>
+        <div class="header-actions">
+            <a mat-stroked-button routerLink="/study/requests">
+                <mat-icon>view_list</mat-icon>
+                Browse Requests
+            </a>
+            <button mat-flat-button type="button" (click)="showCreateGroupForm()" [disabled]="creatingGroup()">
+                <mat-icon>add_circle</mat-icon>
+                New Study Group
+            </button>
+        </div>
     </header>
+
+    @if (showingCreateForm()) {
+    <section class="create-card">
+        <form [formGroup]="createGroupForm" (ngSubmit)="createGroup()" class="create-grid">
+            <label>
+                Course
+                <input type="text" formControlName="course" placeholder="e.g., COP4600" />
+                @if (hasCreateError('course', 'required')) {
+                <span class="inline-error">Course is required.</span>
+                }
+            </label>
+
+            <label>
+                Topic
+                <input type="text" formControlName="topic" placeholder="e.g., Dynamic Programming" />
+                @if (hasCreateError('topic', 'required')) {
+                <span class="inline-error">Topic is required.</span>
+                }
+            </label>
+
+            <label>
+                Max Members
+                <input type="number" formControlName="maxMembers" min="2" max="40" />
+            </label>
+
+            @if (createErrorMessage()) {
+            <p class="inline-error full-row">{{ createErrorMessage() }}</p>
+            }
+
+            <div class="create-actions full-row">
+                <button mat-stroked-button type="button" (click)="hideCreateGroupForm()" [disabled]="creatingGroup()">
+                    Cancel
+                </button>
+                <button mat-flat-button type="submit" [disabled]="creatingGroup()">
+                    @if (creatingGroup()) {
+                    Creating...
+                    } @else {
+                    Create Group
+                    }
+                </button>
+            </div>
+        </form>
+    </section>
+    }
 
     <section class="filters-card">
         <form [formGroup]="filterForm" class="filters-grid">
