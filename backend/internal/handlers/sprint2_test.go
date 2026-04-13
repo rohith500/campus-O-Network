@@ -600,6 +600,19 @@ func TestStudents_CreateStudent_ForbiddenForNonAdmin(t *testing.T) {
 	}
 }
 
+func TestStudents_CreateStudent_UnauthorizedWithoutClaims(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := httptest.NewRequest(http.MethodPost, "/students", bytes.NewBufferString(`{"name":"Alice","email":"alice@ufl.edu","major":"CS","year":2}`))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+
+	h.Students(rr, req)
+
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
 func TestStudents_CreateStudent_SuccessForAdmin(t *testing.T) {
 	h := handlers.New(newMockDB())
 	req := authedReqWithRole(http.MethodPost, "/students", map[string]interface{}{

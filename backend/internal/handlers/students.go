@@ -22,6 +22,19 @@ type updateStudentReq struct {
 	Year  int    `json:"year"`
 }
 
+func requireAdminForStudents(w http.ResponseWriter, r *http.Request) bool {
+	claims, ok := middleware.GetClaims(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return false
+	}
+	if claims.Role != "admin" {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return false
+	}
+	return true
+}
+
 func (h *Handler) Students(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -59,13 +72,7 @@ func (h *Handler) StudentsByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) createStudent(w http.ResponseWriter, r *http.Request) {
-	claims, ok := middleware.GetClaims(r)
-	if !ok {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return
-	}
-	if claims.Role != "admin" {
-		http.Error(w, "forbidden", http.StatusForbidden)
+	if !requireAdminForStudents(w, r) {
 		return
 	}
 
@@ -114,13 +121,7 @@ func (h *Handler) getStudent(w http.ResponseWriter, r *http.Request, id int) {
 }
 
 func (h *Handler) updateStudent(w http.ResponseWriter, r *http.Request, id int) {
-	claims, ok := middleware.GetClaims(r)
-	if !ok {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return
-	}
-	if claims.Role != "admin" {
-		http.Error(w, "forbidden", http.StatusForbidden)
+	if !requireAdminForStudents(w, r) {
 		return
 	}
 
@@ -139,13 +140,7 @@ func (h *Handler) updateStudent(w http.ResponseWriter, r *http.Request, id int) 
 }
 
 func (h *Handler) deleteStudent(w http.ResponseWriter, r *http.Request, id int) {
-	claims, ok := middleware.GetClaims(r)
-	if !ok {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return
-	}
-	if claims.Role != "admin" {
-		http.Error(w, "forbidden", http.StatusForbidden)
+	if !requireAdminForStudents(w, r) {
 		return
 	}
 
