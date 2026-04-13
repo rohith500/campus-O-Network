@@ -7,20 +7,45 @@
 ## Work Completed in Sprint 3
 
 ### Backend (Nitin Avula)
-- User Profile API: get and update profile (`GET /profile`, `PUT /profile`)
-- Post Likes API: like a post (`POST /feed/{id}/like`)
-- Comments API: add, list, delete comments (`GET /feed/{id}/comments`, `POST /feed/{id}/comments`, `DELETE /feed/{id}/comments/{commentId}`)
-- Added `user_profiles` and `comments` tables via SQLite migrations
-- Extended `db.Database` interface with 6 new methods
-- Registered all Sprint 2 + Sprint 3 routes in `main.go` (clubs, events, study groups, profile, likes, comments)
-- Fixed feed query to JOIN users table and return author name with each post
-- 19 new unit tests (65 total passing)
+
+- **User Profile API** — `GET /profile` and `PUT /profile` with upsert logic so students can create or update their bio, interests, availability, and skill level
+- **Post Likes API** — `POST /feed/{id}/like` increments like count on any post
+- **Comments API** — full CRUD: list comments (`GET /feed/{id}/comments`), add a comment (`POST /feed/{id}/comments`), and delete your own comment (`DELETE /feed/{id}/comments/{commentId}`)
+- **SQLite Migrations** — added `user_profiles` and `comments` tables with indexes on `user_id` and `post_id` for query performance
+- **Database Interface** — extended `db.Database` interface with 6 new methods: `GetProfileByUserID`, `UpsertProfile`, `CreateComment`, `GetCommentByID`, `GetCommentsByPostID`, `DeleteComment`
+- **Route Registration** — wired all Sprint 2 and Sprint 3 routes into `main.go` (clubs, events, study groups, profile, likes, comments were all implemented but not registered)
+- **Feed Author Fix** — fixed `GetAllPosts` and `GetPostByID` to JOIN the `users` table and return `AuthorName` with each post so the frontend can display real names
+- **19 new unit tests** — 65 total passing across all handlers
 
 ## Backend Unit Tests
 
-### All 65 Passing Tests
+### Sprint 3 New Tests (19)
 
-| Test | Sprint | Result |
+| Test | Result |
+|---|---|
+| TestGetProfile_NoProfile | PASS |
+| TestGetProfile_Unauthorized | PASS |
+| TestGetProfile_MethodNotAllowed | PASS |
+| TestUpdateProfile_Success | PASS |
+| TestUpdateProfile_Unauthorized | PASS |
+| TestUpdateProfile_MethodNotAllowed | PASS |
+| TestGetProfile_AfterUpdate | PASS |
+| TestLikePost_Success | PASS |
+| TestLikePost_Unauthorized | PASS |
+| TestLikePost_MethodNotAllowed | PASS |
+| TestLikePost_PostNotFound | PASS |
+| TestGetComments_Empty | PASS |
+| TestGetComments_MethodNotAllowed | PASS |
+| TestGetComments_AfterCreate | PASS |
+| TestCreateComment_Success | PASS |
+| TestCreateComment_MissingContent | PASS |
+| TestCreateComment_Unauthorized | PASS |
+| TestDeleteComment_Success | PASS |
+| TestDeleteComment_Unauthorized | PASS |
+
+### All 65 Passing Tests (Sprint 2 + Sprint 3)
+
+| Test | Area | Result |
 |---|---|---|
 | TestRegister_MethodNotAllowed | Auth | PASS |
 | TestRegister_MissingFields | Auth | PASS |
@@ -94,18 +119,18 @@
 ### Auth
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| POST | /auth/register | No | Register a new user |
-| POST | /auth/login | No | Login and receive JWT |
+| POST | /auth/register | No | Register new user, returns JWT |
+| POST | /auth/login | No | Login, returns JWT |
 
 ### Feed
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| GET | /feed | No | List posts (paginated, includes author name) |
+| GET | /feed | No | List posts paginated, includes author name |
 | POST | /feed/create | Yes | Create a post |
 | POST | /feed/{id}/like | Yes | Like a post |
 | GET | /feed/{id}/comments | No | List comments on a post |
 | POST | /feed/{id}/comments | Yes | Add a comment |
-| DELETE | /feed/{id}/comments/{commentId} | Yes | Delete your comment |
+| DELETE | /feed/{id}/comments/{commentId} | Yes | Delete your own comment |
 
 ### Profile (Sprint 3)
 | Method | Endpoint | Auth | Description |
