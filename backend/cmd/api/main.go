@@ -66,8 +66,26 @@ func main() {
 	}))
 
 	// ── Students ────────────────────────────────────────────
-	mux.HandleFunc("/students", middleware.CORS(middleware.Auth(h.Students)))
-	mux.HandleFunc("/students/", middleware.CORS(middleware.Auth(h.StudentsByID)))
+	mux.HandleFunc("/students", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			middleware.Auth(h.Students)(w, r)
+		case http.MethodPost:
+			middleware.RequireRole(h.Students, "admin")(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))
+	mux.HandleFunc("/students/", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			middleware.Auth(h.StudentsByID)(w, r)
+		case http.MethodPut, http.MethodDelete:
+			middleware.RequireRole(h.StudentsByID, "admin")(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))
 
 	// ── Clubs ────────────────────────────────────────────────
 	mux.HandleFunc("/clubs", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
