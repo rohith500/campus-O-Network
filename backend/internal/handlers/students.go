@@ -129,6 +129,16 @@ func (h *Handler) updateStudent(w http.ResponseWriter, r *http.Request, id int) 
 }
 
 func (h *Handler) deleteStudent(w http.ResponseWriter, r *http.Request, id int) {
+	claims, ok := middleware.GetClaims(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if claims.Role != "admin" {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+
 	if err := h.db.DeleteStudent(id); err != nil {
 		http.Error(w, "failed to delete student", http.StatusBadRequest)
 		return
