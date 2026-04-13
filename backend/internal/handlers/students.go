@@ -22,6 +22,19 @@ type updateStudentReq struct {
 	Year  int    `json:"year"`
 }
 
+func requireAdminForStudents(w http.ResponseWriter, r *http.Request) bool {
+	claims, ok := middleware.GetClaims(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return false
+	}
+	if claims.Role != "admin" {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return false
+	}
+	return true
+}
+
 func (h *Handler) Students(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -114,6 +127,10 @@ func (h *Handler) getStudent(w http.ResponseWriter, r *http.Request, id int) {
 }
 
 func (h *Handler) updateStudent(w http.ResponseWriter, r *http.Request, id int) {
+	if !requireAdminForStudents(w, r) {
+		return
+	}
+
 	var req updateStudentReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid json", http.StatusBadRequest)
@@ -129,6 +146,10 @@ func (h *Handler) updateStudent(w http.ResponseWriter, r *http.Request, id int) 
 }
 
 func (h *Handler) deleteStudent(w http.ResponseWriter, r *http.Request, id int) {
+	if !requireAdminForStudents(w, r) {
+		return
+	}
+
 	if err := h.db.DeleteStudent(id); err != nil {
 		http.Error(w, "failed to delete student", http.StatusBadRequest)
 		return
