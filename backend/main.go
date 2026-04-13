@@ -13,7 +13,7 @@ import (
 
 func main() {
 	cfg := config.Load()
-	fmt.Printf("Starting Campus-O-Network API (%s) on port %s...\n", cfg.DBType, cfg.Port)
+	fmt.Printf("[sprint3] Starting Campus-O-Network API (%s) on port %s...\n", cfg.DBType, cfg.Port)
 
 	database, err := db.New(cfg)
 	if err != nil {
