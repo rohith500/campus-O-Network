@@ -23,6 +23,7 @@ go.sum
 # Environment
 .env
 .env.local
+.github/copilot-instrcutions.md
 
 # Logs
 logs/
