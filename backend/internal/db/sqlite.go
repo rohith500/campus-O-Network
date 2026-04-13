@@ -79,12 +79,6 @@ func bootstrapSchema(conn *sql.DB) error {
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		)`,
-		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
-		`CREATE INDEX IF NOT EXISTS idx_feed_posts_user_id ON feed_posts(user_id)`,
-		`CREATE INDEX IF NOT EXISTS idx_feed_posts_created_at ON feed_posts(created_at DESC)`,
-		`CREATE INDEX IF NOT EXISTS idx_club_members_user_id ON club_members(user_id)`,
-		`CREATE INDEX IF NOT EXISTS idx_events_date ON events(date)`,
-		`CREATE INDEX IF NOT EXISTS idx_study_requests_course ON study_requests(course)`,
 		`CREATE TRIGGER IF NOT EXISTS trg_students_updated_at
 		AFTER UPDATE ON students
 		FOR EACH ROW
@@ -166,7 +160,6 @@ func bootstrapSchema(conn *sql.DB) error {
 		)`,
 
 		// ── Sprint 3 ────────────────────────────────────────────
-		`CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id)`,
 		`CREATE TABLE IF NOT EXISTS user_profiles (
 			id           INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id      INTEGER NOT NULL UNIQUE,
@@ -178,7 +171,6 @@ func bootstrapSchema(conn *sql.DB) error {
 			updated_at   DATETIME NOT NULL,
 			FOREIGN KEY (user_id) REFERENCES users(id)
 		)`,
-		`CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id)`,
 		`CREATE TABLE IF NOT EXISTS comments (
 			id         INTEGER PRIMARY KEY AUTOINCREMENT,
 			post_id    INTEGER NOT NULL,
@@ -189,6 +181,16 @@ func bootstrapSchema(conn *sql.DB) error {
 			FOREIGN KEY (post_id) REFERENCES feed_posts(id),
 			FOREIGN KEY (user_id) REFERENCES users(id)
 		)`,
+
+		// Indexes (must be created after their tables exist)
+		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
+		`CREATE INDEX IF NOT EXISTS idx_feed_posts_user_id ON feed_posts(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_feed_posts_created_at ON feed_posts(created_at DESC)`,
+		`CREATE INDEX IF NOT EXISTS idx_club_members_user_id ON club_members(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_events_date ON events(date)`,
+		`CREATE INDEX IF NOT EXISTS idx_study_requests_course ON study_requests(course)`,
+		`CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id)`,
 	}
 
 	for _, stmt := range statements {
