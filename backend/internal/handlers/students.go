@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"backend/internal/middleware"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -103,6 +104,16 @@ func (h *Handler) getStudent(w http.ResponseWriter, r *http.Request, id int) {
 }
 
 func (h *Handler) updateStudent(w http.ResponseWriter, r *http.Request, id int) {
+	claims, ok := middleware.GetClaims(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if claims.Role != "admin" {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+
 	var req updateStudentReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid json", http.StatusBadRequest)
