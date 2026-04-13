@@ -11,18 +11,8 @@ import (
 	"backend/internal/middleware"
 )
 
-func main() {
-	cfg := config.Load()
-	fmt.Printf("Starting Campus-O-Network API (%s) on port %s...\n", cfg.DBType, cfg.Port)
 
-	database, err := db.New(cfg)
-	if err != nil {
-		fmt.Println("Failed to connect to database:", err)
-		return
-	}
-	defer database.Close()
-
-	h := handlers.New(database)
+func newMux(h *handlers.Handler) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	// ── Health ──────────────────────────────────────────────
@@ -146,6 +136,23 @@ func main() {
 		}
 	}))
 	mux.HandleFunc("/study/groups/", middleware.CORS(middleware.Auth(h.JoinStudyGroup)))
+
+	return mux
+}
+
+func main() {
+	cfg := config.Load()
+	fmt.Printf("Starting Campus-O-Network API (%s) on port %s...\n", cfg.DBType, cfg.Port)
+
+	database, err := db.New(cfg)
+	if err != nil {
+		fmt.Println("Failed to connect to database:", err)
+		return
+	}
+	defer database.Close()
+
+	h := handlers.New(database)
+	mux := newMux(h)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,
