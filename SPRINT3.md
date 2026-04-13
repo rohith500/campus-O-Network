@@ -12,7 +12,15 @@
 - Comments API: add, list, delete comments (`GET /feed/{id}/comments`, `POST /feed/{id}/comments`, `DELETE /feed/{id}/comments/{commentId}`)
 - Added `user_profiles` and `comments` tables via SQLite migrations
 - Extended `db.Database` interface with 6 new methods
-- 19 new unit tests (65 total passing)
+- 19 new unit tests for the Sprint 3 backend work
+
+### Backend Authorization Hardening
+- Added reusable role-based authorization middleware in `backend/internal/middleware/auth.go`.
+- Enforced admin-only access for student write routes in `backend/cmd/api/main.go`.
+- Kept defense-in-depth checks in `backend/internal/handlers/students.go`.
+- Added route-level RBAC tests in `backend/cmd/api/main_test.go`.
+- Added middleware authorization tests in `backend/internal/middleware/auth_test.go`.
+- Verified the backend with `go test ./...` after the RBAC changes.
 
 ## Backend Unit Tests
 
@@ -38,6 +46,17 @@
 | TestDeleteComment_Success | PASS |
 | TestDeleteComment_Unauthorized | PASS |
 | TestGetComments_AfterCreate | PASS |
+
+### Authorization Hardening Tests
+| Test | Result |
+|---|---|
+| TestRequireRole_UnauthorizedWithoutToken | PASS |
+| TestRequireRole_ForbiddenForWrongRole | PASS |
+| TestRequireRole_AllowsMatchingRole | PASS |
+| TestStudentsRoute_UnauthorizedWithoutToken | PASS |
+| TestStudentsRoute_ForbiddenForStudentRoleOnCreate | PASS |
+| TestStudentsRoute_AllowsAdminCreate | PASS |
+| TestStudentsByIDRoute_ForbiddenForStudentRoleOnUpdate | PASS |
 
 ## Backend API Documentation
 
@@ -86,5 +105,5 @@
 ## Running Tests
 ```bash
 cd backend
-go test ./internal/handlers/... -v
+go test ./...
 ```
