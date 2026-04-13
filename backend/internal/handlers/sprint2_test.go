@@ -548,6 +548,23 @@ func TestCreatePost_Success(t *testing.T) {
 	}
 }
 
+func TestStudents_CreateStudent_ForbiddenForNonAdmin(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := authedReq(http.MethodPost, "/students", map[string]interface{}{
+		"name":  "Alice",
+		"email": "alice@ufl.edu",
+		"major": "CS",
+		"year":  2,
+	}, 1)
+	rr := httptest.NewRecorder()
+
+	h.Students(rr, req)
+
+	if rr.Code != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
 // ── Club Tests ────────────────────────────────────────────────────────────────
 
 func TestListClubs_Empty(t *testing.T) {
