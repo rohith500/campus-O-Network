@@ -346,13 +346,17 @@ func (m *mockDB) DeleteComment(commentID, userID int) error {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 func authedReq(method, path string, body interface{}, userID int) *http.Request {
+	return authedReqWithRole(method, path, body, userID, "student")
+}
+
+func authedReqWithRole(method, path string, body interface{}, userID int, role string) *http.Request {
 	var buf bytes.Buffer
 	if body != nil {
 		json.NewEncoder(&buf).Encode(body)
 	}
 	req := httptest.NewRequest(method, path, &buf)
 	req.Header.Set("Content-Type", "application/json")
-	claims := &auth.JWTClaims{UserID: userID, Email: "test@ufl.edu", Role: "student"}
+	claims := &auth.JWTClaims{UserID: userID, Email: "test@ufl.edu", Role: role}
 	ctx := context.WithValue(req.Context(), middleware.UserClaimsKey, claims)
 	return req.WithContext(ctx)
 }
