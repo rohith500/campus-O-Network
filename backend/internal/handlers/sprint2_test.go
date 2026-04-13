@@ -600,6 +600,23 @@ func TestStudents_CreateStudent_ForbiddenForNonAdmin(t *testing.T) {
 	}
 }
 
+func TestStudents_CreateStudent_SuccessForAdmin(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := authedReqWithRole(http.MethodPost, "/students", map[string]interface{}{
+		"name":  "Admin Created",
+		"email": "admin.created@ufl.edu",
+		"major": "CS",
+		"year":  2,
+	}, 1, "admin")
+	rr := httptest.NewRecorder()
+
+	h.Students(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
 // ── Club Tests ────────────────────────────────────────────────────────────────
 
 func TestListClubs_Empty(t *testing.T) {
