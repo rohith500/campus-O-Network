@@ -635,6 +635,19 @@ func TestStudents_UpdateStudent_SuccessForAdmin(t *testing.T) {
 	}
 }
 
+func TestStudents_DeleteStudent_SuccessForAdmin(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := authedReqWithRole(http.MethodDelete, "/students/1", nil, 1, "admin")
+	req.URL.Path = "/students/1"
+	rr := httptest.NewRecorder()
+
+	h.StudentsByID(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
 // ── Club Tests ────────────────────────────────────────────────────────────────
 
 func TestListClubs_Empty(t *testing.T) {
