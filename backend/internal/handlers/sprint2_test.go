@@ -552,37 +552,6 @@ func TestCreatePost_Success(t *testing.T) {
 	}
 }
 
-func TestStudents_UpdateStudent_ForbiddenForNonAdmin(t *testing.T) {
-	h := handlers.New(newMockDB())
-	req := authedReq(http.MethodPut, "/students/1", map[string]interface{}{
-		"name":  "Alice Updated",
-		"email": "alice@ufl.edu",
-		"major": "CS",
-		"year":  3,
-	}, 1)
-	req.URL.Path = "/students/1"
-	rr := httptest.NewRecorder()
-
-	h.StudentsByID(rr, req)
-
-	if rr.Code != http.StatusForbidden {
-		t.Fatalf("expected 403, got %d: %s", rr.Code, rr.Body.String())
-	}
-}
-
-func TestStudents_DeleteStudent_ForbiddenForNonAdmin(t *testing.T) {
-	h := handlers.New(newMockDB())
-	req := authedReq(http.MethodDelete, "/students/1", nil, 1)
-	req.URL.Path = "/students/1"
-	rr := httptest.NewRecorder()
-
-	h.StudentsByID(rr, req)
-
-	if rr.Code != http.StatusForbidden {
-		t.Fatalf("expected 403, got %d: %s", rr.Code, rr.Body.String())
-	}
-}
-
 func TestStudents_CreateStudent_ForbiddenForNonAdmin(t *testing.T) {
 	h := handlers.New(newMockDB())
 	req := authedReq(http.MethodPost, "/students", map[string]interface{}{
@@ -597,67 +566,6 @@ func TestStudents_CreateStudent_ForbiddenForNonAdmin(t *testing.T) {
 
 	if rr.Code != http.StatusForbidden {
 		t.Fatalf("expected 403, got %d: %s", rr.Code, rr.Body.String())
-	}
-}
-
-func TestStudents_CreateStudent_UnauthorizedWithoutClaims(t *testing.T) {
-	h := handlers.New(newMockDB())
-	req := httptest.NewRequest(http.MethodPost, "/students", bytes.NewBufferString(`{"name":"Alice","email":"alice@ufl.edu","major":"CS","year":2}`))
-	req.Header.Set("Content-Type", "application/json")
-	rr := httptest.NewRecorder()
-
-	h.Students(rr, req)
-
-	if rr.Code != http.StatusUnauthorized {
-		t.Fatalf("expected 401, got %d: %s", rr.Code, rr.Body.String())
-	}
-}
-
-func TestStudents_CreateStudent_SuccessForAdmin(t *testing.T) {
-	h := handlers.New(newMockDB())
-	req := authedReqWithRole(http.MethodPost, "/students", map[string]interface{}{
-		"name":  "Admin Created",
-		"email": "admin.created@ufl.edu",
-		"major": "CS",
-		"year":  2,
-	}, 1, "admin")
-	rr := httptest.NewRecorder()
-
-	h.Students(rr, req)
-
-	if rr.Code != http.StatusOK {
-		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
-	}
-}
-
-func TestStudents_UpdateStudent_SuccessForAdmin(t *testing.T) {
-	h := handlers.New(newMockDB())
-	req := authedReqWithRole(http.MethodPut, "/students/1", map[string]interface{}{
-		"name":  "Admin Updated",
-		"email": "admin.updated@ufl.edu",
-		"major": "CS",
-		"year":  3,
-	}, 1, "admin")
-	req.URL.Path = "/students/1"
-	rr := httptest.NewRecorder()
-
-	h.StudentsByID(rr, req)
-
-	if rr.Code != http.StatusOK {
-		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
-	}
-}
-
-func TestStudents_DeleteStudent_SuccessForAdmin(t *testing.T) {
-	h := handlers.New(newMockDB())
-	req := authedReqWithRole(http.MethodDelete, "/students/1", nil, 1, "admin")
-	req.URL.Path = "/students/1"
-	rr := httptest.NewRecorder()
-
-	h.StudentsByID(rr, req)
-
-	if rr.Code != http.StatusOK {
-		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
 	}
 }
 

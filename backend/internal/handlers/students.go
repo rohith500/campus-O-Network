@@ -72,7 +72,13 @@ func (h *Handler) StudentsByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) createStudent(w http.ResponseWriter, r *http.Request) {
-	if !requireAdminForStudents(w, r) {
+	claims, ok := middleware.GetClaims(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if claims.Role != "admin" {
+		http.Error(w, "forbidden", http.StatusForbidden)
 		return
 	}
 
