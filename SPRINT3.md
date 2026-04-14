@@ -169,3 +169,18 @@
 cd backend
 go test ./internal/handlers/... -v
 ```
+
+## Sprint 3 Context & Decisions
+
+### Why these three features
+Profile, likes, and comments are the core social layer of Campus-O-Network. Without them the feed is read-only and anonymous. Sprint 3 makes it interactive — students can express identity via profiles, react to posts via likes, and have conversations via comments.
+
+### Technical decisions
+- **Upsert pattern for profiles** — `PUT /profile` uses INSERT OR REPLACE so the same endpoint handles both creation and updates. No separate POST needed.
+- **Flat comment model** — comments are tied directly to posts with `post_id` and `user_id`. Deletion is ownership-checked at the DB layer.
+- **LEFT JOIN for author names** — rather than making N+1 calls to look up user names, `GetAllPosts` now joins the users table in a single query. This is more efficient and returns `AuthorName` directly in the post response.
+- **Route registration fix** — Go's `net/http` ServeMux requires explicit registration. All handlers were implemented in Sprint 2 but `main.go` only had health, auth, feed, and students registered. I registered all remaining routes with proper auth middleware wrapping.
+- **Extracted `db.Database` interface** — all new methods (`GetProfileByUserID`, `UpsertProfile`, `CreateComment`, `GetCommentByID`, `GetCommentsByPostID`, `DeleteComment`) were added to the interface, keeping handlers testable via the mock DB pattern established in Sprint 2.
+
+### Testing approach
+Each new endpoint gets three baseline tests: success case, unauthorized (no JWT), and method not allowed. Comments and profile also get state-verification tests (`TestGetProfile_AfterUpdate`, `TestGetComments_AfterCreate`) that confirm DB state changed correctly after a write.
