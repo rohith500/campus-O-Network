@@ -174,6 +174,8 @@ go test ./internal/handlers/... -v
 
 ### Frontend (Yash Chaudhari, Ashmit Sharma)
 
+Video link: https://youtu.be/9cd023FtD8c 
+
 #### Frontend Team Members
 - Yash Chaudhari - 22603734
 - Ashmit Sharma - 28381009
