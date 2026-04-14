@@ -1,0 +1,60 @@
+<section class="students-page">
+    <header class="students-header">
+        <div>
+            <h1>Student Directory</h1>
+            <p>Manage student enrollment records.</p>
+        </div>
+        <a mat-flat-button routerLink="/students/new">
+            <mat-icon>person_add</mat-icon>
+            Add Student
+        </a>
+    </header>
+
+    <div class="search-row">
+        <mat-form-field appearance="outline">
+            <mat-label>Search students</mat-label>
+            <input matInput [formControl]="filtersForm.controls.query" placeholder="Name, email, major, year" />
+        </mat-form-field>
+    </div>
+
+    @if (loading()) {
+    <div class="state-box">
+        <mat-spinner diameter="36"></mat-spinner>
+        <p>Loading students...</p>
+    </div>
+    } @else if (error()) {
+    <div class="state-box error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ error() }}</p>
+        <button mat-stroked-button type="button" (click)="loadStudents()">Retry</button>
+    </div>
+    } @else if (filteredStudents().length === 0) {
+    <div class="state-box">
+        <mat-icon>inbox</mat-icon>
+        <p>No students found.</p>
+    </div>
+    } @else {
+    <div class="table-wrap">
+        <table class="students-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Major</th>
+                    <th>Year</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (student of filteredStudents(); track student.id) {
+                <tr (click)="openStudent(student.id)">
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.email }}</td>
+                    <td>{{ student.major || 'N/A' }}</td>
+                    <td>{{ student.year || 'N/A' }}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</section>

@@ -18,9 +18,52 @@
     letter-spacing: -0.03em;
 }
 
+.groups-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
 .groups-header p {
     margin: 8px 0 0;
     color: #b0b9d8;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.create-card {
+    margin-top: 18px;
+    background: rgba(10, 14, 24, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 16px;
+    backdrop-filter: blur(8px);
+}
+
+.create-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.inline-error {
+    color: #ffb4bf;
+    font-size: 0.8rem;
+}
+
+.full-row {
+    grid-column: 1 / -1;
+}
+
+.create-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
 .filters-card {
@@ -149,8 +192,13 @@ input::placeholder {
 
 @media (max-width: 860px) {
 
+    .groups-header {
+        flex-direction: column;
+    }
+
     .filters-grid,
-    .groups-grid {
+    .groups-grid,
+    .create-grid {
         grid-template-columns: 1fr;
     }
 }

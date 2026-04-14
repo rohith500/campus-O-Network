@@ -1,0 +1,81 @@
+:host {
+    display: block;
+    min-height: 100vh;
+    background: #0a0a12;
+    color: #f0f0ff;
+    font-family: 'Inter', sans-serif;
+}
+
+.students-page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 18px 40px;
+}
+
+.students-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.students-header h1 {
+    margin: 0;
+}
+
+.students-header p {
+    margin: 8px 0 0;
+    color: #9090b8;
+}
+
+.search-row {
+    margin-top: 14px;
+}
+
+.search-row mat-form-field {
+    width: 100%;
+}
+
+.table-wrap {
+    margin-top: 14px;
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: #16162a;
+}
+
+.students-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.students-table th,
+.students-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.students-table tbody tr {
+    cursor: pointer;
+}
+
+.students-table tbody tr:hover {
+    background: rgba(108, 99, 255, 0.12);
+}
+
+.state-box {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: #16162a;
+    padding: 12px;
+}
+
+.state-box.error {
+    color: #ff9fb5;
+    border-color: rgba(255, 101, 132, 0.4);
+}

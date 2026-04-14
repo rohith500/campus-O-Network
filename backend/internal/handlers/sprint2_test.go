@@ -346,13 +346,17 @@ func (m *mockDB) DeleteComment(commentID, userID int) error {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 func authedReq(method, path string, body interface{}, userID int) *http.Request {
+	return authedReqWithRole(method, path, body, userID, "student")
+}
+
+func authedReqWithRole(method, path string, body interface{}, userID int, role string) *http.Request {
 	var buf bytes.Buffer
 	if body != nil {
 		json.NewEncoder(&buf).Encode(body)
 	}
 	req := httptest.NewRequest(method, path, &buf)
 	req.Header.Set("Content-Type", "application/json")
-	claims := &auth.JWTClaims{UserID: userID, Email: "test@ufl.edu", Role: "student"}
+	claims := &auth.JWTClaims{UserID: userID, Email: "test@ufl.edu", Role: role}
 	ctx := context.WithValue(req.Context(), middleware.UserClaimsKey, claims)
 	return req.WithContext(ctx)
 }
@@ -545,6 +549,23 @@ func TestCreatePost_Success(t *testing.T) {
 	h.CreatePost(rr, req)
 	if rr.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestStudents_CreateStudent_ForbiddenForNonAdmin(t *testing.T) {
+	h := handlers.New(newMockDB())
+	req := authedReq(http.MethodPost, "/students", map[string]interface{}{
+		"name":  "Alice",
+		"email": "alice@ufl.edu",
+		"major": "CS",
+		"year":  2,
+	}, 1)
+	rr := httptest.NewRecorder()
+
+	h.Students(rr, req)
+
+	if rr.Code != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d: %s", rr.Code, rr.Body.String())
 	}
 }
 

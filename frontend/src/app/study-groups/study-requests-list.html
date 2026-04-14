@@ -1,0 +1,55 @@
+<div class="requests-page">
+    <header class="requests-header">
+        <div>
+            <h1>Open Study Requests</h1>
+            <p>Find classmates by course and topic to start studying together.</p>
+        </div>
+        <div class="header-actions">
+            <a mat-stroked-button routerLink="/study-groups">
+                <mat-icon>groups</mat-icon>
+                Study Groups
+            </a>
+            <button mat-flat-button type="button" (click)="openNewRequest()">
+                <mat-icon>add</mat-icon>
+                New Request
+            </button>
+        </div>
+    </header>
+
+    @if (loading()) {
+    <div class="state-card">
+        <mat-spinner diameter="34"></mat-spinner>
+        <p>Loading study requests...</p>
+    </div>
+    }
+
+    @if (errorMessage() && !loading()) {
+    <div class="state-card error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ errorMessage() }}</p>
+    </div>
+    }
+
+    @if (!loading() && !errorMessage()) {
+    @if (requests().length === 0) {
+    <div class="state-card">
+        <mat-icon>inbox</mat-icon>
+        <p>No open study requests yet.</p>
+    </div>
+    } @else {
+    <section class="requests-grid">
+        @for (request of requests(); track request.id) {
+        <article class="request-card">
+            <div class="request-top">
+                <h2>{{ request.topic }}</h2>
+                <span class="course-chip">{{ request.course }}</span>
+            </div>
+            <p class="detail"><strong>Availability:</strong> {{ request.availability || 'Not specified' }}</p>
+            <p class="detail"><strong>Skill Level:</strong> {{ request.skillLevel || 'Not specified' }}</p>
+            <p class="meta">Created: {{ request.createdAt | date: 'medium' }}</p>
+        </article>
+        }
+    </section>
+    }
+    }
+</div>

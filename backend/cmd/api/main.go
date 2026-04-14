@@ -11,18 +11,8 @@ import (
 	"backend/internal/middleware"
 )
 
-func main() {
-	cfg := config.Load()
-	fmt.Printf("Starting Campus-O-Network API (%s) on port %s...\n", cfg.DBType, cfg.Port)
 
-	database, err := db.New(cfg)
-	if err != nil {
-		fmt.Println("Failed to connect to database:", err)
-		return
-	}
-	defer database.Close()
-
-	h := handlers.New(database)
+func newMux(h *handlers.Handler) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	// ── Health ──────────────────────────────────────────────
@@ -66,8 +56,26 @@ func main() {
 	}))
 
 	// ── Students ────────────────────────────────────────────
-	mux.HandleFunc("/students", middleware.CORS(middleware.Auth(h.Students)))
-	mux.HandleFunc("/students/", middleware.CORS(middleware.Auth(h.StudentsByID)))
+	mux.HandleFunc("/students", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			middleware.Auth(h.Students)(w, r)
+		case http.MethodPost:
+			middleware.RequireRole(h.Students, "admin")(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))
+	mux.HandleFunc("/students/", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			middleware.Auth(h.StudentsByID)(w, r)
+		case http.MethodPut, http.MethodDelete:
+			middleware.RequireRole(h.StudentsByID, "admin")(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))
 
 	// ── Clubs ────────────────────────────────────────────────
 	mux.HandleFunc("/clubs", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
@@ -128,6 +136,23 @@ func main() {
 		}
 	}))
 	mux.HandleFunc("/study/groups/", middleware.CORS(middleware.Auth(h.JoinStudyGroup)))
+
+	return mux
+}
+
+func main() {
+	cfg := config.Load()
+	fmt.Printf("Starting Campus-O-Network API (%s) on port %s...\n", cfg.DBType, cfg.Port)
+
+	database, err := db.New(cfg)
+	if err != nil {
+		fmt.Println("Failed to connect to database:", err)
+		return
+	}
+	defer database.Close()
+
+	h := handlers.New(database)
+	mux := newMux(h)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,

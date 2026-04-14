@@ -24,6 +24,7 @@ go.sum
 .env
 .env.local
 
+
 # Logs
 logs/
 *.log

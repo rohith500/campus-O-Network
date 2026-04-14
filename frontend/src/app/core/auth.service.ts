@@ -30,6 +30,7 @@ export interface FeedResponse {
 }
 
 interface FeedApiItem {
+  AuthorName?: string;
   id?: number | string;
   ID?: number | string;
   user_id?: number;
@@ -112,6 +113,16 @@ export class AuthService {
     }
   }
 
+  updateCurrentUserName(name: string): void {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+
+    const current = this.getCurrentUser();
+    if (!current) return;
+
+    localStorage.setItem(USER_KEY, JSON.stringify({ ...current, name: trimmed }));
+  }
+
   getCurrentUserRole(): string | null {
     const userRole = this.getCurrentUser()?.role;
     if (userRole) return userRole;
@@ -148,7 +159,7 @@ export class AuthService {
     return {
       id: Number.isNaN(numericId) ? index : numericId,
       userId,
-      name: item.name ?? item.Name ?? `User #${userId || 'Unknown'}`,
+      name: item.AuthorName ?? item.name ?? item.Name ?? `User #${userId || 'Unknown'}`,
       description: item.description ?? item.content ?? item.Content ?? '',
       likes: Number(item.likes ?? item.Likes ?? 0),
       createdAt: item.created_at ?? item.createdAt ?? item.CreatedAt,

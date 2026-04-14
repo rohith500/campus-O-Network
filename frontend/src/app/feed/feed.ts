@@ -11,6 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService, FeedPost } from '../core/auth.service';
 import { EventModel, EventService } from '../core/event.service';
 import { FeedComment, FeedInteractionService } from '../core/feed-interaction.service';
+import { ProfileService } from '../core/profile.service';
 
 @Component({
   selector: 'app-feed',
@@ -33,6 +34,9 @@ export class Feed implements OnInit {
   error = signal(false);
   eventsError = signal(false);
   canManageClubs = signal(false);
+  canManageStudents = signal(false);
+  sidebarName = signal('User');
+  sidebarBio = signal('CampusNet member');
   likePendingByPostId = signal<Record<number, boolean>>({});
   likeErrorByPostId = signal<Record<number, string>>({});
   commentsOpenByPostId = signal<Record<number, boolean>>({});
@@ -65,12 +69,18 @@ export class Feed implements OnInit {
     private auth: AuthService,
     private eventsService: EventService,
     private feedInteractions: FeedInteractionService,
+    private profileService: ProfileService,
     private router: Router,
   ) { }
 
   ngOnInit() {
     const role = this.auth.getCurrentUserRole();
+    const userName = this.auth.getCurrentUser()?.name?.trim();
+    if (userName) {
+      this.sidebarName.set(userName);
+    }
     this.canManageClubs.set(role === 'admin' || role === 'ambassador');
+    this.canManageStudents.set(role === 'admin');
 
     this.auth.getFeed().subscribe({
       next: (res) => {
@@ -93,6 +103,25 @@ export class Feed implements OnInit {
         this.eventsError.set(true);
       },
     });
+
+    this.profileService.getProfile().subscribe({
+      next: (profile) => {
+        if (!profile) {
+          return;
+        }
+
+        const profileName = profile.name.trim();
+        if (profileName) {
+          this.sidebarName.set(profileName);
+        }
+
+        const profileBio = profile.bio.trim();
+        this.sidebarBio.set(profileBio || 'CampusNet member');
+      },
+      error: () => {
+        // Keep existing badge fallback values when profile fetch fails.
+      },
+    });
   }
 
   logout() {
@@ -100,7 +129,12 @@ export class Feed implements OnInit {
   }
 
   getInitials(name: string): string {
-    return name
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return 'U';
+    }
+
+    return trimmed
       .split(' ')
       .map((n) => n[0])
       .slice(0, 2)

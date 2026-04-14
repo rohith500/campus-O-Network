@@ -40,6 +40,33 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return Auth(next)
 }
 
+func hasRole(userRole string, allowedRoles []string) bool {
+	for _, role := range allowedRoles {
+		if userRole == role {
+			return true
+		}
+	}
+	return false
+}
+
+// RequireRole enforces both authentication and role-based authorization.
+func RequireRole(next http.HandlerFunc, allowedRoles ...string) http.HandlerFunc {
+	return Auth(func(w http.ResponseWriter, r *http.Request) {
+		claims, ok := GetClaims(r)
+		if !ok {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		if len(allowedRoles) > 0 && !hasRole(claims.Role, allowedRoles) {
+			http.Error(w, "forbidden", http.StatusForbidden)
+			return
+		}
+
+		next(w, r)
+	})
+}
+
 func GetClaims(r *http.Request) (*auth.JWTClaims, bool) {
 	claims, ok := r.Context().Value(UserClaimsKey).(*auth.JWTClaims)
 	return claims, ok
