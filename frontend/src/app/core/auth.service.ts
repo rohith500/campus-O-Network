@@ -26,6 +26,7 @@ export interface FeedResponse {
 }
 
 interface FeedApiItem {
+  AuthorName?: string;
   id?: number | string;
   user_id?: number;
   name?: string;
@@ -138,8 +139,8 @@ export class AuthService {
   private mapFeedItem(item: FeedApiItem, index: number): FeedPost {
     return {
       id: String(item.id ?? index),
-      name: item.name ?? `User #${item.user_id ?? 'Unknown'}`,
-      description: item.description ?? item.content ?? '',
+      name: item.AuthorName ?? item.name ?? `User #${item.user_id ?? 'Unknown'}`,
+      description: item.description ?? item.content ?? (item as any).Content ?? '',
     };
   }
 }
