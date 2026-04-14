@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"backend/internal/middleware"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -19,6 +20,19 @@ type updateStudentReq struct {
 	Email string `json:"email"`
 	Major string `json:"major"`
 	Year  int    `json:"year"`
+}
+
+func requireAdminForStudents(w http.ResponseWriter, r *http.Request) bool {
+	claims, ok := middleware.GetClaims(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return false
+	}
+	if claims.Role != "admin" {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return false
+	}
+	return true
 }
 
 func (h *Handler) Students(w http.ResponseWriter, r *http.Request) {
@@ -58,6 +72,16 @@ func (h *Handler) StudentsByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) createStudent(w http.ResponseWriter, r *http.Request) {
+	claims, ok := middleware.GetClaims(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if claims.Role != "admin" {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+
 	var req createStudentReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid json", http.StatusBadRequest)
@@ -103,6 +127,10 @@ func (h *Handler) getStudent(w http.ResponseWriter, r *http.Request, id int) {
 }
 
 func (h *Handler) updateStudent(w http.ResponseWriter, r *http.Request, id int) {
+	if !requireAdminForStudents(w, r) {
+		return
+	}
+
 	var req updateStudentReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid json", http.StatusBadRequest)
@@ -118,6 +146,10 @@ func (h *Handler) updateStudent(w http.ResponseWriter, r *http.Request, id int) 
 }
 
 func (h *Handler) deleteStudent(w http.ResponseWriter, r *http.Request, id int) {
+	if !requireAdminForStudents(w, r) {
+		return
+	}
+
 	if err := h.db.DeleteStudent(id); err != nil {
 		http.Error(w, "failed to delete student", http.StatusBadRequest)
 		return
