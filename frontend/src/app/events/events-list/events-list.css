@@ -149,6 +149,33 @@ input {
     color: #ccd5f0;
 }
 
+.rsvp-actions {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.rsvp-actions button.selected {
+    border-color: rgba(127, 211, 255, 0.9);
+    background: rgba(127, 211, 255, 0.18);
+}
+
+.rsvp-progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #c8d4fc;
+    font-size: 0.82rem;
+}
+
+.rsvp-error {
+    margin: 8px 0 0;
+    color: #ffb8b8;
+    font-size: 0.82rem;
+}
+
 .event-meta {
     margin-top: 10px;
     display: flex;

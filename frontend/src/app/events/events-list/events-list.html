@@ -76,6 +76,44 @@
                 <span class="rsvp-badge" [attr.data-status]="event.rsvpStatus">{{ rsvpLabel(event.rsvpStatus) }}</span>
             </div>
             <p class="event-description">{{ event.description || 'No description provided.' }}</p>
+            <div class="rsvp-actions">
+                <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="isRsvpPending(event.id)"
+                    [class.selected]="isRsvpSelected(event.id, 'going')"
+                    (click)="setRsvp(event.id, 'going')"
+                >
+                    Going
+                </button>
+                <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="isRsvpPending(event.id)"
+                    [class.selected]="isRsvpSelected(event.id, 'maybe')"
+                    (click)="setRsvp(event.id, 'maybe')"
+                >
+                    Maybe
+                </button>
+                <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="isRsvpPending(event.id)"
+                    [class.selected]="isRsvpSelected(event.id, 'not_going')"
+                    (click)="setRsvp(event.id, 'not_going')"
+                >
+                    Not Going
+                </button>
+                @if (isRsvpPending(event.id)) {
+                <div class="rsvp-progress" aria-live="polite">
+                    <mat-spinner diameter="16"></mat-spinner>
+                    <span>Saving...</span>
+                </div>
+                }
+            </div>
+            @if (rsvpError(event.id)) {
+            <p class="rsvp-error">{{ rsvpError(event.id) }}</p>
+            }
             <div class="event-meta">
                 <span><mat-icon>schedule</mat-icon>{{ formatEventDate(event.date) }}</span>
                 <span><mat-icon>place</mat-icon>{{ event.location || 'Location TBD' }}</span>

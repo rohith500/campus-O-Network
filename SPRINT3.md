@@ -1,8 +1,10 @@
 # Sprint 3 – Campus-O-Network
 
 ## Team Members
-- Nitin Avula – 12255254
-- Rohith Reddy Nama – 69965665
+- Nitin Avula – 12255254 (Backend)
+- Rohith Reddy Nama – 69965665 (Backend)
+- Yash Chaudhari - 22603734 (Frontend)
+- Ashmit Sharma - 28381009 (Frontend)
 
 ## Work Completed in Sprint 3
 
@@ -169,3 +171,74 @@
 cd backend
 go test ./internal/handlers/... -v
 ```
+
+### Frontend (Yash Chaudhari, Ashmit Sharma)
+
+Video link: https://youtu.be/9cd023FtD8c 
+
+#### Frontend Team Members
+- Yash Chaudhari - 22603734
+- Ashmit Sharma - 28381009
+
+#### Frontend Changes Completed in Sprint 3 
+- Added RSVP actions in events list with optimistic status updates and inline error handling (`POST /events/{id}/rsvp`).
+- Integrated feed likes and comments UX with protected create/delete actions and lazy-loaded comment panels.
+- Added post composer on `/feed` with content validation and publish flow (`POST /feed/create`).
+- Fixed frontend response mapping for Go JSON field casing (`ID`, `UserID`, `Content`, `Likes`) to avoid feed/interaction mismatches.
+- Added frontend-side like memory per user to prevent repeated likes from the same UI session (temporary guard).
+- Reduced feed clutter by showing only 3 events preview and added post pagination (8 posts per page).
+
+#### Frontend Backlog from Sprint 2 Completed in Sprint 3
+- Connected protected feed creation flow from Sprint 2 API docs to the feed composer (`POST /feed/create`).
+- Connected event RSVP flow from Sprint 2 API docs to events list actions (`POST /events/{id}/rsvp`).
+
+#### Frontend Work Remaining
+- Implement memory for likes (not completed because true enforcement requires backend changes).
+- Show user's name instead of user number in feed/comments (requires backend to return author display names).
+- Add delete post feature in frontend (pending backend route wiring and ownership rules).
+
+## Frontend Unit Tests
+
+### File: `frontend/src/app/app.spec.ts` (Component: App)
+- `should create the app`: verifies the root app component is created successfully.
+- `should render router outlet host`: verifies router outlet is rendered in the root template.
+
+### File: `frontend/src/app/core/auth.interceptor.spec.ts` (Module: Auth Interceptor)
+- `adds Authorization header for API base URL when token exists`: verifies API requests include Bearer token.
+- `does not add Authorization header for non-API URLs`: verifies external requests are not modified.
+
+### File: `frontend/src/app/core/role.guard.spec.ts` (Module: Role Guard)
+- `allows access when user role is in allowed roles`: verifies role-guard grants access for valid roles.
+- `redirects to feed when role is not allowed`: verifies role-guard blocks unauthorized roles and redirects.
+
+### File: `frontend/src/app/core/api/api.utils.spec.ts` (Module: API Utils)
+- `buildHttpParams should include only non-empty values`: verifies query params skip empty/undefined values.
+- `applyClientPagination should return paged items with metadata`: verifies client pagination output shape.
+- `normalizeApiError should map HttpErrorResponse status to structured code`: verifies error normalization mapping.
+- `mapToApiResult should wrap successful results`: verifies success values are wrapped as `{ ok: true }`.
+- `mapToApiResult should wrap thrown errors into unified error shape`: verifies errors are wrapped as `{ ok: false }` with normalized metadata.
+
+### File: `frontend/src/app/events/events-list/events-list.spec.ts` (Component: EventsList)
+- `optimistically updates RSVP and prevents duplicate submit while in flight`: verifies optimistic RSVP UI and in-flight request lock.
+- `redirects to login when user attempts RSVP without token`: verifies unauthenticated RSVP redirects to `/auth/login`.
+- `surfaces inline 400 error and reverts optimistic status`: verifies validation error messaging and rollback.
+- `surfaces inline 404 error and reverts optimistic status`: verifies not-found error messaging and rollback.
+- `surfaces inline 401 error and redirects to login`: verifies unauthorized handling and redirect.
+
+### File: `frontend/src/app/feed/feed.spec.ts` (Component: Feed)
+- `likes optimistically and prevents duplicate like while request is pending`: verifies optimistic like count update and in-flight lock.
+- `rolls back optimistic like on error`: verifies like rollback and inline error handling.
+- `redirects to login if unauthenticated user tries to like or comment`: verifies guarded feed interactions for unauthenticated users.
+- `loads comments when opening comments panel`: verifies lazy comment fetch on first open.
+- `adds comment optimistically then replaces temp comment with server result`: verifies optimistic comment create flow.
+- `deletes own comment after successful API call`: verifies comment delete success updates local list.
+- `prevents reliking the same post after a successful like`: verifies frontend one-like guard per post.
+- `loads liked posts from storage on init`: verifies like memory restoration on feed load.
+- `validates composer content before submit`: verifies empty post content is blocked with inline validation.
+- `creates post and prepends to feed without reload, then resets composer`: verifies successful publish behavior.
+- `prevents duplicate post submit while request is in flight`: verifies post submit lock while publishing.
+- `shows user-facing 400 error when post create fails validation on backend`: verifies 400 handling copy for composer.
+- `shows 401 error and redirects to login on unauthorized post create`: verifies unauthorized composer submit behavior.
+- `paginates posts with at most 8 per page`: verifies page size and page navigation logic.
+- `resets posts pagination to first page after creating a new post`: verifies new posts return feed to page 1.
+
