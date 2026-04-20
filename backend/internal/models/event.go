@@ -16,6 +16,7 @@ type ClubMember struct {
 	ID       int       `db:"id"`
 	ClubID   int       `db:"club_id"`
 	UserID   int       `db:"user_id"`
+	UserName string    `db:"user_name"`
 	Role     string    `db:"role"` // member, ambassador
 	JoinedAt time.Time `db:"joined_at"`
 }

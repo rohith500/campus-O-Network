@@ -86,7 +86,7 @@
           <ul class="member-list">
             @for (member of members(); track member.id) {
               <li>
-                <span>User #{{ member.user_id }}</span>
+                <span>{{ member.UserName || member.user_name || ("User #" + member.user_id) }}</span>
                 <span class="member-role">{{ member.role || 'member' }}</span>
               </li>
             }

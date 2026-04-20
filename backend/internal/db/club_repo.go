@@ -85,7 +85,7 @@ func (db *DB) LeaveClub(clubID, userID int) error {
 
 func (db *DB) GetClubMembers(clubID int) ([]*models.ClubMember, error) {
 	rows, err := db.conn.Query(
-		`SELECT id, club_id, user_id, role, joined_at FROM club_members WHERE club_id = ?`, clubID,
+		`SELECT cm.id, cm.club_id, cm.user_id, COALESCE(u.name, 'Unknown') as user_name, cm.role, cm.joined_at FROM club_members cm LEFT JOIN users u ON u.id = cm.user_id WHERE cm.club_id = ?`, clubID,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get club members: %w", err)
@@ -95,7 +95,7 @@ func (db *DB) GetClubMembers(clubID int) ([]*models.ClubMember, error) {
 	var members []*models.ClubMember
 	for rows.Next() {
 		m := &models.ClubMember{}
-		if err := rows.Scan(&m.ID, &m.ClubID, &m.UserID, &m.Role, &m.JoinedAt); err != nil {
+		if err := rows.Scan(&m.ID, &m.ClubID, &m.UserID, &m.UserName, &m.Role, &m.JoinedAt); err != nil {
 			return nil, fmt.Errorf("failed to scan member: %w", err)
 		}
 		members = append(members, m)

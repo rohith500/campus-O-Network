@@ -43,6 +43,8 @@ interface APIClub {
 }
 
 export interface ClubMember {
+  UserName?: string;
+  user_name?: string;
   id: number;
   club_id?: number;
   user_id?: number;

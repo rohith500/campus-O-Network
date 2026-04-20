@@ -99,14 +99,15 @@ export class StudyGroupsService {
 
     details(groupId: number): Observable<StudyGroupViewModel> {
         return this.http
-            .get<StudyGroupsListResponse>(this.groupsUrl)
+            .get<{ ok: boolean; group: StudyGroupApiItem; members: StudyGroupMemberApiItem[] }>(
+                `${this.groupsUrl}/${groupId}`
+            )
             .pipe(
                 map((response) => {
-                    const group = response.groups.find((item) => item.id === groupId);
-                    if (!group) {
+                    if (!response.group) {
                         throw new Error('Study group not found.');
                     }
-                    return this.mapGroup(group);
+                    return this.mapGroup(response.group);
                 }),
             );
     }
