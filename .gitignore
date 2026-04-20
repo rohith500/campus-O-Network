@@ -43,3 +43,5 @@ Thumbs.db
 .DS_Store
 backend/app.db
 backend/*.db
+backend/data/*.db
+backend/seed.sh
