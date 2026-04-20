@@ -31,5 +31,6 @@ type StudyGroupMember struct {
 	ID           int       `db:"id"`
 	StudyGroupID int       `db:"study_group_id"`
 	UserID       int       `db:"user_id"`
+	UserName     string    `db:"user_name"`
 	JoinedAt     time.Time `db:"joined_at"`
 }

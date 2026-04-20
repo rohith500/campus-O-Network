@@ -129,7 +129,7 @@ func (db *DB) JoinStudyGroup(groupID, userID int) error {
 
 func (db *DB) GetStudyGroupMembers(groupID int) ([]*models.StudyGroupMember, error) {
 	rows, err := db.conn.Query(
-		`SELECT id, study_group_id, user_id, joined_at FROM study_group_members WHERE study_group_id = ?`, groupID,
+		`SELECT sgm.id, sgm.study_group_id, sgm.user_id, COALESCE(u.name, 'Unknown') as user_name, sgm.joined_at FROM study_group_members sgm LEFT JOIN users u ON u.id = sgm.user_id WHERE sgm.study_group_id = ?`, groupID,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get study group members: %w", err)
@@ -139,7 +139,7 @@ func (db *DB) GetStudyGroupMembers(groupID int) ([]*models.StudyGroupMember, err
 	var members []*models.StudyGroupMember
 	for rows.Next() {
 		m := &models.StudyGroupMember{}
-		if err := rows.Scan(&m.ID, &m.StudyGroupID, &m.UserID, &m.JoinedAt); err != nil {
+		if err := rows.Scan(&m.ID, &m.StudyGroupID, &m.UserID, &m.UserName, &m.JoinedAt); err != nil {
 			return nil, fmt.Errorf("failed to scan member: %w", err)
 		}
 		members = append(members, m)

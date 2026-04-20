@@ -88,7 +88,13 @@ func main() {
 			h.ListStudyGroups(w, r)
 		}
 	}))
-	mux.HandleFunc("/study/groups/", middleware.CORS(middleware.Auth(h.JoinStudyGroup)))
+	mux.HandleFunc("/study/groups/", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
+		if hasSuffix(r.URL.Path, "join") {
+			middleware.Auth(h.JoinStudyGroup)(w, r)
+		} else {
+			h.GetStudyGroup(w, r)
+		}
+	}))
 
 	// ── Profile (Sprint 3) ────────────────────────────────────────────────────
 	mux.HandleFunc("/profile", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
