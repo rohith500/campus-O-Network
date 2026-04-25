@@ -16,6 +16,8 @@ export interface AuthUser {
 }
 
 export interface FeedPost {
+  timeAgo?: string;
+  TimeAgo?: string;
   id: number;
   userId: number;
   name: string;
@@ -161,6 +163,7 @@ export class AuthService {
       userId,
       name: item.AuthorName ?? item.name ?? item.Name ?? `User #${userId || 'Unknown'}`,
       description: item.description ?? item.content ?? item.Content ?? '',
+      timeAgo: (item as any).TimeAgo ?? (item as any).timeAgo ?? '',
       likes: Number(item.likes ?? item.Likes ?? 0),
       createdAt: item.created_at ?? item.createdAt ?? item.CreatedAt,
       updatedAt: item.updated_at ?? item.updatedAt ?? item.UpdatedAt,

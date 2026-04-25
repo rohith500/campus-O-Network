@@ -81,6 +81,9 @@ func (h *Handler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to get feed", http.StatusInternalServerError)
 		return
 	}
+	for _, p := range posts {
+		p.TimeAgo = TimeAgo(p.CreatedAt)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(posts)

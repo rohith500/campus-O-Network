@@ -12,6 +12,7 @@ type Post struct {
 	Likes      int       `db:"likes"       json:"Likes"`
 	CreatedAt  time.Time `db:"created_at"  json:"CreatedAt"`
 	UpdatedAt  time.Time `db:"updated_at"  json:"UpdatedAt"`
+	TimeAgo    string    `db:"-"           json:"TimeAgo"`
 }
 
 // Comment represents a comment on a post
