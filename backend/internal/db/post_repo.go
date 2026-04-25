@@ -123,3 +123,52 @@ func (db *DB) LikePost(id int) error {
 	}
 	return nil
 }
+
+
+// HasLiked checks if a user has already liked a post
+func (db *DB) HasLiked(postID, userID int) (bool, error) {
+	var count int
+	err := db.conn.QueryRow(
+		`SELECT COUNT(*) FROM post_likes WHERE post_id = ? AND user_id = ?`,
+		postID, userID,
+	).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+// ToggleLike adds or removes a like
+func (db *DB) ToggleLike(postID, userID int) (bool, error) {
+	already, err := db.HasLiked(postID, userID)
+	if err != nil {
+		return false, err
+	}
+	now := time.Now()
+	if already {
+		_, err = db.conn.Exec(
+			`DELETE FROM post_likes WHERE post_id = ? AND user_id = ?`,
+			postID, userID,
+		)
+		if err != nil {
+			return false, err
+		}
+		_, err = db.conn.Exec(
+			`UPDATE feed_posts SET likes = MAX(0, likes - 1), updated_at = ? WHERE id = ?`,
+			now, postID,
+		)
+		return false, err
+	}
+	_, err = db.conn.Exec(
+		`INSERT INTO post_likes (post_id, user_id, created_at) VALUES (?, ?, ?)`,
+		postID, userID, now,
+	)
+	if err != nil {
+		return false, err
+	}
+	_, err = db.conn.Exec(
+		`UPDATE feed_posts SET likes = likes + 1, updated_at = ? WHERE id = ?`,
+		now, postID,
+	)
+	return true, err
+}

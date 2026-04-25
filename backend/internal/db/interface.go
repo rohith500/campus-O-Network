@@ -21,6 +21,8 @@ type Database interface {
 	UpdatePost(id int, content, tags string) error
 	DeletePost(id int) error
 	LikePost(id int) error
+	ToggleLike(postID, userID int) (bool, error)
+	HasLiked(postID, userID int) (bool, error)
 
 	// Comments (Sprint 3)
 	CreateComment(postID, userID int, content string) (*models.Comment, error)

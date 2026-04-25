@@ -19,7 +19,7 @@ func (h *Handler) LikePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, ok := middleware.GetClaims(r)
+	claims, ok := middleware.GetClaims(r)
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -31,8 +31,9 @@ func (h *Handler) LikePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.db.LikePost(id); err != nil {
-		http.Error(w, "failed to like post", http.StatusInternalServerError)
+	liked, err := h.db.ToggleLike(id, claims.UserID)
+	if err != nil {
+		http.Error(w, "failed to toggle like", http.StatusInternalServerError)
 		return
 	}
 
@@ -45,6 +46,7 @@ func (h *Handler) LikePost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"ok":    true,
+		"liked": liked,
 		"likes": post.Likes,
 	})
 }
