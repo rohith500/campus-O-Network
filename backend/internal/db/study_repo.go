@@ -146,3 +146,22 @@ func (db *DB) GetStudyGroupMembers(groupID int) ([]*models.StudyGroupMember, err
 	}
 	return members, rows.Err()
 }
+
+// LeaveStudyGroup removes a user from a study group
+func (db *DB) LeaveStudyGroup(groupID, userID int) error {
+	result, err := db.conn.Exec(
+		`DELETE FROM study_group_members WHERE study_group_id = ? AND user_id = ?`,
+		groupID, userID,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to leave study group: %w", err)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to check rows affected: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("not a member of this study group")
+	}
+	return nil
+}

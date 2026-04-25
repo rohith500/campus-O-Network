@@ -63,5 +63,6 @@ type Database interface {
 	GetStudyGroupByID(id int) (*models.StudyGroup, error)
 	ListStudyGroups() ([]*models.StudyGroup, error)
 	JoinStudyGroup(groupID, userID int) error
+	LeaveStudyGroup(groupID, userID int) error
 	GetStudyGroupMembers(groupID int) ([]*models.StudyGroupMember, error)
 }

@@ -91,6 +91,8 @@ func main() {
 	mux.HandleFunc("/study/groups/", middleware.CORS(func(w http.ResponseWriter, r *http.Request) {
 		if hasSuffix(r.URL.Path, "join") {
 			middleware.Auth(h.JoinStudyGroup)(w, r)
+		} else if hasSuffix(r.URL.Path, "leave") {
+			middleware.Auth(h.LeaveStudyGroup)(w, r)
 		} else {
 			h.GetStudyGroup(w, r)
 		}

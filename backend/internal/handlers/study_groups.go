@@ -168,3 +168,31 @@ func (h *Handler) GetStudyGroup(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
         json.NewEncoder(w).Encode(map[string]interface{}{"ok": true, "group": group, "members": members})
 }
+
+func (h *Handler) LeaveStudyGroup(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	claims, ok := middleware.GetClaims(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if len(parts) < 3 {
+		http.Error(w, "invalid path", http.StatusBadRequest)
+		return
+	}
+	groupID, err := strconv.Atoi(parts[2])
+	if err != nil || groupID <= 0 {
+		http.Error(w, "invalid group id", http.StatusBadRequest)
+		return
+	}
+	if err := h.db.LeaveStudyGroup(groupID, claims.UserID); err != nil {
+		http.Error(w, "failed to leave study group", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{"ok": true, "message": "left study group"})
+}
