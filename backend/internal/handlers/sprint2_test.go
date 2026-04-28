@@ -949,3 +949,29 @@ func TestJoinStudyGroup_NotFound(t *testing.T) {
 		t.Fatalf("expected 500, got %d", rr.Code)
 	}
 }
+
+// ── Sprint 4 mock methods ─────────────────────────────────────────────────────
+
+func (m *mockDB) HasLiked(postID, userID int) (bool, error) {
+	return false, nil
+}
+
+func (m *mockDB) ToggleLike(postID, userID int) (bool, error) {
+	for _, p := range m.posts {
+		if p.ID == postID {
+			p.Likes++
+			return true, nil
+		}
+	}
+	return false, fmt.Errorf("post not found")
+}
+
+func (m *mockDB) LeaveStudyGroup(groupID, userID int) error {
+	for i, m2 := range m.sgMembers {
+		if m2.StudyGroupID == groupID && m2.UserID == userID {
+			m.sgMembers = append(m.sgMembers[:i], m.sgMembers[i+1:]...)
+			return nil
+		}
+	}
+	return fmt.Errorf("not a member")
+}
