@@ -1,40 +1,66 @@
-# Name : campus-O-Network
+# Campus-O-Network
 
-## Description : project is a campus community platform that combines club discovery with a public campus feed and Discord-like group chat, designed to reduce friction for students who feel lost, stressed, or hesitant to join communities. Students can browse what’s happening on campus before joining anything, then seamlessly move into structured club channels.
+A campus social network for University of Florida students to connect through clubs, events, study groups, and a shared feed.
 
-## Objectives
-1. Make discovery effortless : Help students find clubs/events/study groups using tags, filters, and a campus-wide public feed.
-2. Reduce joining friction : Provide smart onboarding and “recommended channels” so new members know where to start.
-3. Enable real-time coordination ; Offer structured club channels and real-time chat for announcements, Q&A, and event planning.
-4. Support study collaboration ; Let students create/join study groups matched by course/topic and availability, with time-boxed group spaces.
-5. Keep the platform safe and trustworthy ; Add ambassador verification, reporting, moderation tools, and audit logs.
+## Requirements
 
-## Goals 
+- Go 1.21+
+- Node.js 18+
+- npm 9+
+- SQLite3
 
-1. Students can go from feed → event/study group → chat in under 2 minutes.
-2. Clubs can promote events and convert viewers into members/RSVPs.
-3. Moderation/reporting is clear, fast, and traceable.
-4. The system stays responsive with pagination, indexing, and rate limiting.
+## Running the Backend
 
-## Members
-#### frontend --> Ashmit Sharma and Yash Chaudhari
-#### Backend --> Nitin Avula and Rohith Reddy Nama
+cd backend && go run main.go
 
-## Sprint 2
+API starts on http://localhost:8079
 
-### New Backend Features
-- Clubs API: list, create, get, join, leave
-- Events API: list, create, get, RSVP
-- Study Groups API: post requests, list/create/join groups
+## Running the Frontend
 
-### Running the Backend
-```bash
-cd backend
-go run cmd/api/main.go
-```
+cd frontend && npm install && npm start
 
-### Running Backend Tests
-```bash
-cd backend
-go test ./internal/handlers/... -v
-```
+App opens at http://localhost:4200
+
+## First Time Setup
+
+Register at http://localhost:4200/auth/register
+
+Or via API:
+curl -X POST http://localhost:8079/auth/register -H "Content-Type: application/json" -d '{"email":"you@ufl.edu","password":"pass","name":"Your Name"}'
+
+## Running Backend Tests
+
+cd backend && go test ./internal/handlers/... -v
+
+78 tests covering auth, feed, clubs, events, study groups, profile, likes, and comments.
+
+## Backend API
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | /auth/register | No | Register new user |
+| POST | /auth/login | No | Login returns JWT |
+| GET | /feed | No | List posts with author names and timestamps |
+| POST | /feed/create | Yes | Create a post |
+| POST | /feed/{id}/like | Yes | Toggle like on a post |
+| GET | /feed/{id}/comments | No | List comments |
+| POST | /feed/{id}/comments | Yes | Add a comment |
+| DELETE | /feed/{id}/comments/{commentId} | Yes | Delete your comment |
+| GET | /profile | Yes | Get your profile |
+| PUT | /profile | Yes | Create or update profile |
+| GET | /clubs | No | List all clubs |
+| POST | /clubs | Yes | Create a club |
+| GET | /clubs/{id} | No | Get club with members |
+| POST | /clubs/{id}/join | Yes | Join a club |
+| DELETE | /clubs/{id}/leave | Yes | Leave a club |
+| GET | /events | No | List events |
+| POST | /events | Yes | Create an event |
+| GET | /events/{id} | No | Get event with RSVPs |
+| POST | /events/{id}/rsvp | Yes | RSVP or update RSVP |
+| GET | /study/requests | No | List study requests |
+| POST | /study/requests | Yes | Post a study request |
+| GET | /study/groups | No | List study groups |
+| POST | /study/groups | Yes | Create a study group |
+| GET | /study/groups/{id} | No | Get study group with members |
+| POST | /study/groups/{id}/join | Yes | Join a study group |
+| DELETE | /study/groups/{id}/leave | Yes | Leave a study group |
