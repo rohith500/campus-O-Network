@@ -82,8 +82,7 @@ func (h *Handler) GetClub(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to load club members", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{"ok": true, "club": club, "members": members})
+	h.respondJSON(w, http.StatusOK, map[string]interface{}{"ok": true, "club": club, "members": members})
 }
 
 func (h *Handler) JoinClub(w http.ResponseWriter, r *http.Request) {

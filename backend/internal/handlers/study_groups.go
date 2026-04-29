@@ -144,8 +144,7 @@ func (h *Handler) JoinStudyGroup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to load study group members", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{"ok": true, "message": "joined study group", "members": members})
+	h.respondJSON(w, http.StatusOK, map[string]interface{}{"ok": true, "message": "joined study group", "members": members})
 }
 
 func (h *Handler) GetStudyGroup(w http.ResponseWriter, r *http.Request) {
@@ -173,8 +172,7 @@ func (h *Handler) GetStudyGroup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to load study group members", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{"ok": true, "group": group, "members": members})
+	h.respondJSON(w, http.StatusOK, map[string]interface{}{"ok": true, "group": group, "members": members})
 }
 
 func (h *Handler) LeaveStudyGroup(w http.ResponseWriter, r *http.Request) {

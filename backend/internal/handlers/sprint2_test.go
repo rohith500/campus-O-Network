@@ -30,6 +30,8 @@ type mockDB struct {
 	comments                []*models.Comment
 	getStudyGroupMembersErr error
 	getClubMembersErr       error
+	getRSVPsErr             error
+	getProfileErr           error
 	createUserErr           error
 	getUserByEmailErr       error
 	createPostErr           error
@@ -138,6 +140,9 @@ func (m *mockDB) RSVPEvent(eventID, userID int, status string) error {
 	return nil
 }
 func (m *mockDB) GetRSVPs(eventID int) ([]*models.RSVP, error) {
+	if m.getRSVPsErr != nil {
+		return nil, m.getRSVPsErr
+	}
 	var out []*models.RSVP
 	for _, rv := range m.rsvps {
 		if rv.EventID == eventID {
@@ -301,6 +306,9 @@ func (m *mockDB) DeleteStudent(id int) error                                    
 // ── Profile methods (Sprint 3) ────────────────────────────────────────────────
 
 func (m *mockDB) GetProfileByUserID(userID int) (*models.UserProfile, error) {
+	if m.getProfileErr != nil {
+		return nil, m.getProfileErr
+	}
 	for _, p := range m.profiles {
 		if p.UserID == userID {
 			return p, nil
@@ -793,6 +801,21 @@ func TestGetEvent_Success(t *testing.T) {
 		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
 	}
 }
+
+func TestGetEvent_MemberLookupError(t *testing.T) {
+	mdb := newMockDB()
+	mdb.events = append(mdb.events, &models.Event{ID: 1, ClubID: 1, CreatorID: 2, Title: "UF Hackathon", Date: time.Now().Add(24 * time.Hour)})
+	mdb.getRSVPsErr = fmt.Errorf("rsvp lookup failed")
+	h := handlers.New(mdb)
+	req := httptest.NewRequest(http.MethodGet, "/events/1", nil)
+	req.URL.Path = "/events/1"
+	rr := httptest.NewRecorder()
+	h.GetEvent(rr, req)
+	if rr.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
 func TestListEvents_FilterByClub(t *testing.T) {
 	mdb := newMockDB()
 	mdb.events = append(mdb.events,

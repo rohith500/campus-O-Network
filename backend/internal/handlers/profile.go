@@ -29,6 +29,10 @@ func (h *Handler) GetProfile(w http.ResponseWriter, r *http.Request) {
 
 	profile, err := h.db.GetProfileByUserID(claims.UserID)
 	if err != nil {
+		if err.Error() != "profile not found" {
+			http.Error(w, "failed to get profile", http.StatusInternalServerError)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"ok":      true,

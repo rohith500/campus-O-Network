@@ -3,6 +3,7 @@ package handlers_test
 import (
 	"backend/internal/models"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -98,6 +99,18 @@ func TestGetProfile_AfterUpdate(t *testing.T) {
 	h.GetProfile(getRR, getReq)
 	if getRR.Code != http.StatusOK {
 		t.Fatalf("get failed: %d: %s", getRR.Code, getRR.Body.String())
+	}
+}
+
+func TestGetProfile_DatabaseError(t *testing.T) {
+	mdb := newMockDB()
+	mdb.getProfileErr = fmt.Errorf("db failure")
+	h := newHandlerWith(mdb)
+	req := authedReq(http.MethodGet, "/profile", nil, 1)
+	rr := httptest.NewRecorder()
+	h.GetProfile(rr, req)
+	if rr.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d: %s", rr.Code, rr.Body.String())
 	}
 }
 
@@ -214,6 +227,20 @@ func TestCreateComment_MissingContent(t *testing.T) {
 	h.CreateComment(rr, req)
 	if rr.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400, got %d", rr.Code)
+	}
+}
+
+func TestCreateComment_TooLong(t *testing.T) {
+	mdb := newMockDB()
+	mdb.posts = append(mdb.posts, &models.Post{ID: 1, Content: "Hello"})
+	h := newHandlerWith(mdb)
+	longContent := strings.Repeat("a", 1001)
+	req := authedReq(http.MethodPost, "/feed/1/comments", map[string]string{"content": longContent}, 2)
+	req.URL.Path = "/feed/1/comments"
+	rr := httptest.NewRecorder()
+	h.CreateComment(rr, req)
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d: %s", rr.Code, rr.Body.String())
 	}
 }
 
