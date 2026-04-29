@@ -31,6 +31,7 @@ type mockDB struct {
 	getStudyGroupMembersErr error
 	getClubMembersErr       error
 	getRSVPsErr             error
+	getProfileErr           error
 	createUserErr           error
 	getUserByEmailErr       error
 	createPostErr           error
@@ -305,6 +306,9 @@ func (m *mockDB) DeleteStudent(id int) error                                    
 // ── Profile methods (Sprint 3) ────────────────────────────────────────────────
 
 func (m *mockDB) GetProfileByUserID(userID int) (*models.UserProfile, error) {
+	if m.getProfileErr != nil {
+		return nil, m.getProfileErr
+	}
 	for _, p := range m.profiles {
 		if p.UserID == userID {
 			return p, nil
