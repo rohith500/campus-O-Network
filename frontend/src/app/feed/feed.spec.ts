@@ -58,7 +58,7 @@ describe('Feed interactions', () => {
     interactionSpy.likePost.mockReturnValue(of({ likes: 1 }));
     interactionSpy.getComments.mockReturnValue(of([]));
     interactionSpy.createComment.mockReturnValue(
-      of({ id: 2, postId: 1, userId: 7, content: 'hello', createdAt: '2026-01-01T00:00:00Z' }),
+      of({ id: 2, postId: 1, userId: 7, authorName: 'User', content: 'hello', createdAt: '2026-01-01T00:00:00Z' }),
     );
     interactionSpy.deleteComment.mockReturnValue(of(undefined));
     interactionSpy.createPost.mockReturnValue(
@@ -131,7 +131,7 @@ describe('Feed interactions', () => {
 
   it('loads comments when opening comments panel', () => {
     interactionSpy.getComments.mockReturnValue(
-      of([{ id: 11, postId: 1, userId: 3, content: 'Nice', createdAt: '2026-01-01T00:00:00Z' }]),
+      of([{ id: 11, postId: 1, userId: 3, authorName: 'Alice', content: 'Nice', createdAt: '2026-01-01T00:00:00Z' }]),
     );
 
     component.toggleComments(1);
@@ -142,7 +142,7 @@ describe('Feed interactions', () => {
   });
 
   it('adds comment optimistically then replaces temp comment with server result', () => {
-    const pending$ = new Subject<{ id: number; postId: number; userId: number; content: string; createdAt: string }>();
+    const pending$ = new Subject<{ id: number; postId: number; userId: number; authorName: string; content: string; createdAt: string }>();
     interactionSpy.createComment.mockReturnValue(pending$);
 
     component.commentsByPostId.set({ 1: [] });
@@ -154,12 +154,18 @@ describe('Feed interactions', () => {
     expect(optimistic.content).toBe('First!');
     expect(optimistic.id).toBeLessThan(0);
 
-    pending$.next({ id: 30, postId: 1, userId: 7, content: 'First!', createdAt: '2026-01-01T00:00:00Z' });
+    pending$.next({ id: 30, postId: 1, userId: 7, authorName: 'User', content: 'First!', createdAt: '2026-01-01T00:00:00Z' });
     pending$.complete();
 
     const finalized = component.commentsForPost(1)[0];
     expect(finalized.id).toBe(30);
     expect(component.commentSubmitting(1)).toBe(false);
+  });
+
+  it('prefers the commenter display name when available', () => {
+    expect(
+      component.commentAuthor({ id: 1, postId: 1, userId: 7, authorName: 'Alice', content: 'Nice' }),
+    ).toBe('Alice');
   });
 
   it('deletes own comment after successful API call', () => {

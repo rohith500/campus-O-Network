@@ -77,7 +77,11 @@ func (h *Handler) GetClub(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "club not found", http.StatusNotFound)
 		return
 	}
-	members, _ := h.db.GetClubMembers(id)
+	members, err := h.db.GetClubMembers(id)
+	if err != nil {
+		http.Error(w, "failed to load club members", http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{"ok": true, "club": club, "members": members})
 }

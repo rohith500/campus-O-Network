@@ -2,6 +2,7 @@ package handlers_test
 
 import (
 	"backend/internal/models"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -145,5 +146,33 @@ func TestGetStudyGroup_MethodNotAllowed(t *testing.T) {
 	h.GetStudyGroup(rr, req)
 	if rr.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("expected 405, got %d", rr.Code)
+	}
+}
+
+func TestGetStudyGroup_MemberLookupError(t *testing.T) {
+	mdb := newMockDB()
+	mdb.studyGroups = append(mdb.studyGroups, &models.StudyGroup{ID: 1, Course: "CAP5771", Topic: "ML", MaxMembers: 4})
+	mdb.getStudyGroupMembersErr = fmt.Errorf("member lookup failed")
+	h := newHandlerWith(mdb)
+	req := httptest.NewRequest(http.MethodGet, "/study/groups/1", nil)
+	req.URL.Path = "/study/groups/1"
+	rr := httptest.NewRecorder()
+	h.GetStudyGroup(rr, req)
+	if rr.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestJoinStudyGroup_MemberLookupError(t *testing.T) {
+	mdb := newMockDB()
+	mdb.studyGroups = append(mdb.studyGroups, &models.StudyGroup{ID: 1, Course: "CAP5771", Topic: "ML", MaxMembers: 4})
+	mdb.getStudyGroupMembersErr = fmt.Errorf("member lookup failed")
+	h := newHandlerWith(mdb)
+	req := authedReq(http.MethodPost, "/study/groups/1/join", nil, 2)
+	req.URL.Path = "/study/groups/1/join"
+	rr := httptest.NewRecorder()
+	h.JoinStudyGroup(rr, req)
+	if rr.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d: %s", rr.Code, rr.Body.String())
 	}
 }

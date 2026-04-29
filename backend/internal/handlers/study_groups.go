@@ -139,34 +139,42 @@ func (h *Handler) JoinStudyGroup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to join study group", http.StatusInternalServerError)
 		return
 	}
-	members, _ := h.db.GetStudyGroupMembers(groupID)
+	members, err := h.db.GetStudyGroupMembers(groupID)
+	if err != nil {
+		http.Error(w, "failed to load study group members", http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{"ok": true, "message": "joined study group", "members": members})
 }
-	
+
 func (h *Handler) GetStudyGroup(w http.ResponseWriter, r *http.Request) {
-        if r.Method != http.MethodGet {
-                http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-                return
-        }
-        parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-        if len(parts) < 3 {
-                http.Error(w, "invalid path", http.StatusBadRequest)
-                return
-        }
-        groupID, err := strconv.Atoi(parts[2])
-        if err != nil || groupID <= 0 {
-                http.Error(w, "invalid group id", http.StatusBadRequest)
-                return
-        }
-        group, err := h.db.GetStudyGroupByID(groupID)
-        if err != nil {
-                http.Error(w, "study group not found", http.StatusNotFound)
-                return
-        }
-        members, _ := h.db.GetStudyGroupMembers(groupID)
-        w.Header().Set("Content-Type", "application/json")
-        json.NewEncoder(w).Encode(map[string]interface{}{"ok": true, "group": group, "members": members})
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if len(parts) < 3 {
+		http.Error(w, "invalid path", http.StatusBadRequest)
+		return
+	}
+	groupID, err := strconv.Atoi(parts[2])
+	if err != nil || groupID <= 0 {
+		http.Error(w, "invalid group id", http.StatusBadRequest)
+		return
+	}
+	group, err := h.db.GetStudyGroupByID(groupID)
+	if err != nil {
+		http.Error(w, "study group not found", http.StatusNotFound)
+		return
+	}
+	members, err := h.db.GetStudyGroupMembers(groupID)
+	if err != nil {
+		http.Error(w, "failed to load study group members", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{"ok": true, "group": group, "members": members})
 }
 
 func (h *Handler) LeaveStudyGroup(w http.ResponseWriter, r *http.Request) {

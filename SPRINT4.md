@@ -3,6 +3,8 @@
 ## Team Members
 - Nitin Avula - 12255254
 - Rohith Reddy Nama - 69965665
+- Yash Chaudhari - 22603734
+- Ashmit Sharma - 28381009
 
 ## Work Completed in Sprint 4
 
@@ -10,12 +12,16 @@
 - Toggle Like API: POST /feed/{id}/like toggles like/unlike using post_likes table with UNIQUE constraint
 - Leave Study Group API: DELETE /study/groups/{id}/leave allows students to leave a group
 - Get Study Group API: GET /study/groups/{id} returns full group details with member names
+- Study Group Error Handling: GET /study/groups/{id} and POST /study/groups/{id}/join now fail safely if member lookup fails
 - Relative Timestamps: feed posts return TimeAgo field computed server-side
 - Member Names in Clubs and Study Groups via LEFT JOIN on users table
+- Comment Author Names: feed comments now include AuthorName in API responses so the frontend can show real names instead of user numbers
 - Added post_likes migration 007_create_post_likes.sql
-- 11 new unit tests, 78 total passing
+- 2 new backend unit tests, 81 total passing
 
-## Sprint 4 New Tests (11)
+## Backend Unit Tests
+
+### Sprint 4 New Tests
 
 | Test | Result |
 |---|---|
@@ -30,8 +36,7 @@
 | TestGetStudyGroup_Success | PASS |
 | TestGetStudyGroup_NotFound | PASS |
 | TestGetStudyGroup_MethodNotAllowed | PASS |
-
-## All 78 Passing Tests
+| TestGetComments_IncludesAuthorName | PASS |
 
 | Test | Area |
 |---|---|
@@ -101,6 +106,9 @@
 | TestCreateComment_Unauthorized | Comments |
 | TestDeleteComment_Success | Comments |
 | TestDeleteComment_Unauthorized | Comments |
+| TestGetComments_IncludesAuthorName | Comments |
+| TestGetStudyGroup_MemberLookupError | Sprint 4 |
+| TestJoinStudyGroup_MemberLookupError | Sprint 4 |
 | TestToggleLike_LikeSuccess | Sprint 4 |
 | TestToggleLike_Unauthorized | Sprint 4 |
 | TestToggleLike_MethodNotAllowed | Sprint 4 |
@@ -112,6 +120,9 @@
 | TestGetStudyGroup_Success | Sprint 4 |
 | TestGetStudyGroup_NotFound | Sprint 4 |
 | TestGetStudyGroup_MethodNotAllowed | Sprint 4 |
+| TestGetClub_MemberLookupError | Clubs |
+
+## All 82 Passing Backend Tests
 
 ## Backend API Documentation
 
@@ -127,8 +138,8 @@
 | GET | /feed | No | List posts with AuthorName and TimeAgo |
 | POST | /feed/create | Yes | Create a post |
 | POST | /feed/{id}/like | Yes | Toggle like or unlike |
-| GET | /feed/{id}/comments | No | List comments |
-| POST | /feed/{id}/comments | Yes | Add a comment |
+| GET | /feed/{id}/comments | No | List comments with AuthorName |
+| POST | /feed/{id}/comments | Yes | Add a comment and return AuthorName |
 | DELETE | /feed/{id}/comments/{commentId} | Yes | Delete your comment |
 
 ### Profile
@@ -167,5 +178,20 @@
 
 ## Running Tests
 
+```bash
 cd backend
 go test ./internal/handlers/... -v
+```
+
+## Frontend Tests
+
+### Unit Tests
+- `frontend/src/app/app.spec.ts` - root app smoke tests
+- `frontend/src/app/core/auth.interceptor.spec.ts` - auth header injection tests
+- `frontend/src/app/core/role.guard.spec.ts` - role-based route guard tests
+- `frontend/src/app/core/api/api.utils.spec.ts` - API utility tests
+- `frontend/src/app/events/events-list/events-list.spec.ts` - RSVP flow tests
+- `frontend/src/app/feed/feed.spec.ts` - feed, likes, comments, and composer tests
+
+### Cypress Tests
+- `frontend/cypress/e2e/spec.cy.ts` - register flow from the landing page through successful form submission

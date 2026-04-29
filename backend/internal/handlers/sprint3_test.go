@@ -2,6 +2,7 @@ package handlers_test
 
 import (
 	"backend/internal/models"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -180,6 +181,7 @@ func TestGetComments_MethodNotAllowed(t *testing.T) {
 
 func TestCreateComment_Success(t *testing.T) {
 	mdb := newMockDB()
+	mdb.users = append(mdb.users, &models.User{ID: 2, Email: "alice@ufl.edu", Name: "Alice", Role: "student"})
 	mdb.posts = append(mdb.posts, &models.Post{ID: 1, Content: "Hello"})
 	h := newHandlerWith(mdb)
 	req := authedReq(http.MethodPost, "/feed/1/comments", map[string]string{"content": "Great post!"}, 2)
@@ -188,6 +190,17 @@ func TestCreateComment_Success(t *testing.T) {
 	h.CreateComment(rr, req)
 	if rr.Code != http.StatusCreated {
 		t.Fatalf("expected 201, got %d: %s", rr.Code, rr.Body.String())
+	}
+	var resp map[string]interface{}
+	if err := json.Unmarshal(rr.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("expected json body: %v", err)
+	}
+	comment, ok := resp["comment"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected comment object in response")
+	}
+	if comment["AuthorName"] != "Alice" {
+		t.Fatalf("expected author name Alice, got %v", comment["AuthorName"])
 	}
 }
 
@@ -260,5 +273,34 @@ func TestGetComments_AfterCreate(t *testing.T) {
 	h.GetComments(getRR, getReq)
 	if getRR.Code != http.StatusOK {
 		t.Fatalf("get failed: %d", getRR.Code)
+	}
+}
+
+func TestGetComments_IncludesAuthorName(t *testing.T) {
+	mdb := newMockDB()
+	mdb.users = append(mdb.users, &models.User{ID: 2, Email: "alice@ufl.edu", Name: "Alice", Role: "student"})
+	mdb.posts = append(mdb.posts, &models.Post{ID: 1, Content: "Hello"})
+	mdb.comments = append(mdb.comments, &models.Comment{ID: 1, PostID: 1, UserID: 2, Content: "Nice!", CreatedAt: time.Now(), UpdatedAt: time.Now()})
+	h := newHandlerWith(mdb)
+
+	req := httptest.NewRequest(http.MethodGet, "/feed/1/comments", nil)
+	req.URL.Path = "/feed/1/comments"
+	rr := httptest.NewRecorder()
+	h.GetComments(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
+	}
+
+	var resp struct {
+		Comments []models.Comment `json:"comments"`
+	}
+	if err := json.Unmarshal(rr.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("expected json body: %v", err)
+	}
+	if len(resp.Comments) != 1 {
+		t.Fatalf("expected 1 comment, got %d", len(resp.Comments))
+	}
+	if resp.Comments[0].AuthorName != "Alice" {
+		t.Fatalf("expected author name Alice, got %q", resp.Comments[0].AuthorName)
 	}
 }
