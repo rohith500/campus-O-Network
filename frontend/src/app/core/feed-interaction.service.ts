@@ -6,6 +6,7 @@ export interface FeedComment {
   id: number;
   postId: number;
   userId: number;
+  authorName?: string;
   content: string;
   createdAt?: string;
   updatedAt?: string;
@@ -37,6 +38,9 @@ interface CreateCommentResponse {
 }
 
 interface ApiComment {
+  authorName?: string;
+  AuthorName?: string;
+  author_name?: string;
   id?: number;
   ID?: number;
   post_id?: number;
@@ -116,6 +120,7 @@ export class FeedInteractionService {
       id: Number(comment.id ?? comment.ID ?? 0),
       postId: Number(comment.post_id ?? comment.postId ?? comment.PostID ?? 0),
       userId: Number(comment.user_id ?? comment.userId ?? comment.UserID ?? 0),
+      authorName: comment.authorName ?? comment.AuthorName ?? comment.author_name,
       content: String(comment.content ?? comment.Content ?? ''),
       createdAt: comment.created_at ?? comment.createdAt ?? comment.CreatedAt,
       updatedAt: comment.updated_at ?? comment.updatedAt ?? comment.UpdatedAt,

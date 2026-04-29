@@ -1,6 +1,6 @@
 # Campus-O-Network
 
-A campus social network for University of Florida students to connect through clubs, events, study groups, and a shared feed.
+A campus social network for University of Florida students to connect through clubs, events, study groups, profiles, and a shared feed.
 
 ## Requirements
 
@@ -9,30 +9,55 @@ A campus social network for University of Florida students to connect through cl
 - npm 9+
 - SQLite3
 
+## Setup
+
+1. Clone the repository and open the project root.
+2. Start the backend so the API is available on `http://localhost:8079`.
+3. Start the frontend so the app is available on `http://localhost:4200`.
+
 ## Running the Backend
 
-cd backend && go run main.go
+```bash
+cd backend
+go run main.go
+```
 
-API starts on http://localhost:8079
+The backend serves the REST API and SQLite database-backed application state.
 
 ## Running the Frontend
 
-cd frontend && npm install && npm start
+```bash
+cd frontend
+npm install
+npm start
+```
 
-App opens at http://localhost:4200
+The frontend opens in the browser at `http://localhost:4200`.
 
-## First Time Setup
+## First Time Use
 
-Register at http://localhost:4200/auth/register
+1. Register a new student account at `http://localhost:4200/auth/register`.
+2. Log in to receive a JWT-backed session.
+3. Visit the feed to create posts, like posts, and comment on posts.
+4. Use the profile page to save your bio, interests, availability, and skill level.
+5. Browse clubs, events, and study groups from the navigation pages.
 
-Or via API:
-curl -X POST http://localhost:8079/auth/register -H "Content-Type: application/json" -d '{"email":"you@ufl.edu","password":"pass","name":"Your Name"}'
+You can also register directly through the API:
+
+```bash
+curl -X POST http://localhost:8079/auth/register \
+	-H "Content-Type: application/json" \
+	-d '{"email":"you@ufl.edu","password":"pass","name":"Your Name"}'
+```
 
 ## Running Backend Tests
 
-cd backend && go test ./internal/handlers/... -v
+```bash
+cd backend
+go test ./internal/handlers/... -v
+```
 
-78 tests covering auth, feed, clubs, events, study groups, profile, likes, and comments.
+82 backend handler tests cover auth, feed, clubs, events, study groups, profile, likes, and comments.
 
 ## Backend API
 
@@ -43,8 +68,8 @@ cd backend && go test ./internal/handlers/... -v
 | GET | /feed | No | List posts with author names and timestamps |
 | POST | /feed/create | Yes | Create a post |
 | POST | /feed/{id}/like | Yes | Toggle like on a post |
-| GET | /feed/{id}/comments | No | List comments |
-| POST | /feed/{id}/comments | Yes | Add a comment |
+| GET | /feed/{id}/comments | No | List comments with author names |
+| POST | /feed/{id}/comments | Yes | Add a comment and return author name |
 | DELETE | /feed/{id}/comments/{commentId} | Yes | Delete your comment |
 | GET | /profile | Yes | Get your profile |
 | PUT | /profile | Yes | Create or update profile |

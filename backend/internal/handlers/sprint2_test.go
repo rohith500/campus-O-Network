@@ -17,23 +17,25 @@ import (
 )
 
 type mockDB struct {
-	users             []*models.User
-	posts             []*models.Post
-	clubs             []*models.Club
-	clubMembers       []*models.ClubMember
-	events            []*models.Event
-	rsvps             []*models.RSVP
-	studyReqs         []*models.StudyRequest
-	studyGroups       []*models.StudyGroup
-	sgMembers         []*models.StudyGroupMember
-	profiles          []*models.UserProfile
-	comments          []*models.Comment
-	createUserErr     error
-	getUserByEmailErr error
-	createPostErr     error
-	getAllPostsErr    error
-	nextID            int
-	shouldFail        bool
+	users                   []*models.User
+	posts                   []*models.Post
+	clubs                   []*models.Club
+	clubMembers             []*models.ClubMember
+	events                  []*models.Event
+	rsvps                   []*models.RSVP
+	studyReqs               []*models.StudyRequest
+	studyGroups             []*models.StudyGroup
+	sgMembers               []*models.StudyGroupMember
+	profiles                []*models.UserProfile
+	comments                []*models.Comment
+	getStudyGroupMembersErr error
+	getClubMembersErr       error
+	createUserErr           error
+	getUserByEmailErr       error
+	createPostErr           error
+	getAllPostsErr          error
+	nextID                  int
+	shouldFail              bool
 }
 
 func newMockDB() *mockDB      { return &mockDB{nextID: 1} }
@@ -64,6 +66,9 @@ func (m *mockDB) GetClubByID(id int) (*models.Club, error) {
 	return nil, fmt.Errorf("club not found")
 }
 func (m *mockDB) GetClubMembers(clubID int) ([]*models.ClubMember, error) {
+	if m.getClubMembersErr != nil {
+		return nil, m.getClubMembersErr
+	}
 	var out []*models.ClubMember
 	for _, cm := range m.clubMembers {
 		if cm.ClubID == clubID {
@@ -198,6 +203,9 @@ func (m *mockDB) JoinStudyGroup(groupID, userID int) error {
 	return nil
 }
 func (m *mockDB) GetStudyGroupMembers(groupID int) ([]*models.StudyGroupMember, error) {
+	if m.getStudyGroupMembersErr != nil {
+		return nil, m.getStudyGroupMembersErr
+	}
 	var out []*models.StudyGroupMember
 	for _, m2 := range m.sgMembers {
 		if m2.StudyGroupID == groupID {
@@ -217,7 +225,14 @@ func (m *mockDB) CreateUser(email, passwordHash, name, role string) (*models.Use
 	m.users = append(m.users, u)
 	return u, nil
 }
-func (m *mockDB) GetUserByID(id int) (*models.User, error) { return nil, nil }
+func (m *mockDB) GetUserByID(id int) (*models.User, error) {
+	for _, u := range m.users {
+		if u.ID == id {
+			return u, nil
+		}
+	}
+	return nil, fmt.Errorf("user not found")
+}
 func (m *mockDB) GetUserByEmail(email string) (*models.User, error) {
 	if m.getUserByEmailErr != nil {
 		return nil, m.getUserByEmailErr
@@ -663,6 +678,21 @@ func TestGetClub_Success(t *testing.T) {
 		t.Fatalf("expected 200, got %d: %s", rr.Code, rr.Body.String())
 	}
 }
+
+func TestGetClub_MemberLookupError(t *testing.T) {
+	mdb := newMockDB()
+	mdb.clubs = append(mdb.clubs, &models.Club{ID: 1, Name: "Go Club"})
+	mdb.getClubMembersErr = fmt.Errorf("member lookup failed")
+	h := handlers.New(mdb)
+	req := httptest.NewRequest(http.MethodGet, "/clubs/1", nil)
+	req.URL.Path = "/clubs/1"
+	rr := httptest.NewRecorder()
+	h.GetClub(rr, req)
+	if rr.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
 func TestListClubs_WithData(t *testing.T) {
 	mdb := newMockDB()
 	mdb.clubs = append(mdb.clubs, &models.Club{ID: 1, Name: "Go Club"}, &models.Club{ID: 2, Name: "AI Club"})

@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"backend/internal/middleware"
+	"backend/internal/models"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -69,6 +71,9 @@ func (h *Handler) GetComments(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to get comments", http.StatusInternalServerError)
 		return
 	}
+	for _, comment := range comments {
+		h.attachCommentAuthor(comment)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
@@ -113,6 +118,7 @@ func (h *Handler) CreateComment(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to create comment", http.StatusInternalServerError)
 		return
 	}
+	h.attachCommentAuthor(comment)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -157,4 +163,18 @@ func (h *Handler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 		"ok":      true,
 		"message": "comment deleted",
 	})
+}
+
+func (h *Handler) attachCommentAuthor(comment *models.Comment) {
+	if comment == nil {
+		return
+	}
+
+	user, err := h.db.GetUserByID(comment.UserID)
+	if err == nil && user != nil && strings.TrimSpace(user.Name) != "" {
+		comment.AuthorName = user.Name
+		return
+	}
+
+	comment.AuthorName = fmt.Sprintf("User #%d", comment.UserID)
 }

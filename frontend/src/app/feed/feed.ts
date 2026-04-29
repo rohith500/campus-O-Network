@@ -351,6 +351,7 @@ export class Feed implements OnInit {
       id: temporaryId,
       postId,
       userId: currentUser?.id ?? 0,
+      authorName: currentUser?.name?.trim() || `User #${currentUser?.id ?? 'Unknown'}`,
       content,
       createdAt: new Date().toISOString(),
     };
@@ -415,7 +416,7 @@ export class Feed implements OnInit {
   }
 
   commentAuthor(comment: FeedComment): string {
-    return `User #${comment.userId || 'Unknown'}`;
+    return comment.authorName?.trim() || `User #${comment.userId || 'Unknown'}`;
   }
 
   formatCommentTime(dateValue?: string): string {
