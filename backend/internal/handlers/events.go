@@ -95,7 +95,11 @@ func (h *Handler) GetEvent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "event not found", http.StatusNotFound)
 		return
 	}
-	rsvps, _ := h.db.GetRSVPs(id)
+	rsvps, err := h.db.GetRSVPs(id)
+	if err != nil {
+		http.Error(w, "failed to load event RSVPs", http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{"ok": true, "event": event, "rsvps": rsvps})
 }
