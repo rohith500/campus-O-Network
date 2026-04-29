@@ -230,6 +230,20 @@ func TestCreateComment_MissingContent(t *testing.T) {
 	}
 }
 
+func TestCreateComment_TooLong(t *testing.T) {
+	mdb := newMockDB()
+	mdb.posts = append(mdb.posts, &models.Post{ID: 1, Content: "Hello"})
+	h := newHandlerWith(mdb)
+	longContent := strings.Repeat("a", 1001)
+	req := authedReq(http.MethodPost, "/feed/1/comments", map[string]string{"content": longContent}, 2)
+	req.URL.Path = "/feed/1/comments"
+	rr := httptest.NewRecorder()
+	h.CreateComment(rr, req)
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
 func TestCreateComment_Unauthorized(t *testing.T) {
 	h := newHandlerWithMock()
 	req := httptest.NewRequest(http.MethodPost, "/feed/1/comments", strings.NewReader(`{"content":"hi"}`))

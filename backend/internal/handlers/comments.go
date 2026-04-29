@@ -14,6 +14,8 @@ type createCommentReq struct {
 	Content string `json:"content"`
 }
 
+const maxCommentLength = 1000
+
 // LikePost handles POST /feed/{id}/like — protected
 func (h *Handler) LikePost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -110,6 +112,10 @@ func (h *Handler) CreateComment(w http.ResponseWriter, r *http.Request) {
 	req.Content = strings.TrimSpace(req.Content)
 	if req.Content == "" {
 		http.Error(w, "content is required", http.StatusBadRequest)
+		return
+	}
+	if len(req.Content) > maxCommentLength {
+		http.Error(w, "content must be 1000 characters or fewer", http.StatusBadRequest)
 		return
 	}
 
